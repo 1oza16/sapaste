@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SApaste</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/style.css"/>
+  <link rel="shortcut icon" href="img/favicon.png" type="image/x-icon">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <img src="img/logoGray.png" class="logo">
+    <div class="status">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText">Conectado</span>
+    </div>
+  </header>
+
+  <!-- CARD EDITOR -->
+  <div class="card">
+
+    <!-- Toolbar de formato -->
+    <div class="toolbar">
+      <button class="fmt-btn" id="btnBold"      title="Negrita"   onclick="fmt('bold')"><b>B</b></button>
+      <button class="fmt-btn" id="btnItalic"    title="Cursiva"   onclick="fmt('italic')"><i>I</i></button>
+      <button class="fmt-btn" id="btnUnderline" title="Subrayado" onclick="fmt('underline')"><u>S</u></button>
+      <div class="toolbar-sep"></div>
+      <button class="fmt-btn" title="Limpiar formato" onclick="fmt('removeFormat')" style="font-size:0.7rem;">✕ fmt</button>
+    </div>
+
+    <!-- Área de texto editable -->
+    <div class="editor-wrap">
+      <div
+        id="editor"
+        contenteditable="true"
+        spellcheck="false"
+        data-placeholder="Escribe o pega tu texto aquí..."
+      ></div>
+    </div>
+
+    <!-- Opciones -->
+    <div class="options">
+      <div class="option-pill" id="pillPwd" onclick="togglePwd()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Contraseña
+      </div>
+      <div class="option-pill" id="pillExp" onclick="cycleExpiry()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        <span id="pillExpText">Sin expiración</span>
+      </div>
+      <span class="char-info" id="charInfo">0 caracteres</span>
+    </div>
+
+    <!-- Acciones -->
+    <div class="actions">
+      <div class="status-row">
+        <div class="status-dot" id="statusDot2"></div>
+        <span id="statusText2">Conectado</span>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost" onclick="clearEditor()">Limpiar</button>
+        <button class="btn btn-primary" onclick="guardarPaste()">Copiar al clipboard</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Campo contraseña (aparece si se activa) -->
+  <div class="pwd-row" id="pwdRow">
+    <input class="pwd-input" type="password" id="pwdInput" placeholder="Introduce una contraseña para proteger el paste..." />
+  </div>
+
+  <!-- Resultado URL -->
+  <div class="result" id="resultBox">
+    <span class="result-label">Enlace</span>
+    <span class="result-url" id="resultUrl"></span>
+    <button class="copy-btn" id="copyBtn" onclick="copyUrl()">Copiar</button>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+<script src="script/main.js"></script>
+</body>
+</html>
