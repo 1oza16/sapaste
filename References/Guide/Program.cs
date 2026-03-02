@@ -12,6 +12,7 @@ using BCrypt.Net;
 using System.Security.Cryptography;
 using System.Text;
 
+// Arranque que crea el "constructor" de la aplicación.
 var builder = WebApplication.CreateBuilder(args);
 
 // ─── SERVICIOS ───────────────────────────────────────────────
