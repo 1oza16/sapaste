@@ -1,0 +1,37 @@
+C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\bin\Debug\net8.0\appsettings.Development.json
+C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\bin\Debug\net8.0\appsettings.json
+C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\bin\Debug\net8.0\SApaste - Api.staticwebassets.endpoints.json
+C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\bin\Debug\net8.0\SApaste - Api.exe
+C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\bin\Debug\net8.0\SApaste - Api.deps.json
+C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\bin\Debug\net8.0\SApaste - Api.runtimeconfig.json
+C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\bin\Debug\net8.0\SApaste - Api.dll
+C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\bin\Debug\net8.0\SApaste - Api.pdb
+C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\bin\Debug\net8.0\Microsoft.AspNetCore.OpenApi.dll
+C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\bin\Debug\net8.0\Microsoft.OpenApi.dll
+C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\bin\Debug\net8.0\Swashbuckle.AspNetCore.Swagger.dll
+C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\bin\Debug\net8.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\bin\Debug\net8.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\obj\Debug\net8.0\SApaste - Api.csproj.AssemblyReference.cache
+C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\obj\Debug\net8.0\rpswa.dswa.cache.json
+C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\obj\Debug\net8.0\SApaste - Api.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\obj\Debug\net8.0\SApaste - Api.AssemblyInfoInputs.cache
+C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\obj\Debug\net8.0\SApaste - Api.AssemblyInfo.cs
+C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\obj\Debug\net8.0\SApaste - Api.csproj.CoreCompileInputs.cache
+C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\obj\Debug\net8.0\SApaste - Api.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\obj\Debug\net8.0\SApaste - Api.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\obj\Debug\net8.0\SApaste - Api.sourcelink.json
+C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\obj\Debug\net8.0\rjimswa.dswa.cache.json
+C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\obj\Debug\net8.0\rjsmrazor.dswa.cache.json
+C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\obj\Debug\net8.0\rjsmcshtml.dswa.cache.json
+C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\obj\Debug\net8.0\scopedcss\bundle\SApaste - Api.styles.css
+C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\obj\Debug\net8.0\staticwebassets.build.json
+C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\obj\Debug\net8.0\staticwebassets.build.json.cache
+C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\obj\Debug\net8.0\staticwebassets.development.json
+C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\obj\Debug\net8.0\staticwebassets.build.endpoints.json
+C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
+C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\obj\Debug\net8.0\SApaste .31EAA54D.Up2Date
+C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\obj\Debug\net8.0\SApaste - Api.dll
+C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\obj\Debug\net8.0\refint\SApaste - Api.dll
+C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\obj\Debug\net8.0\SApaste - Api.pdb
+C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\obj\Debug\net8.0\SApaste - Api.genruntimeconfig.cache
+C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\obj\Debug\net8.0\ref\SApaste - Api.dll
