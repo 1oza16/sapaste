@@ -18,7 +18,16 @@
     </header>
     <main>
         <div class="CuadroTexto">
-            <!-- Título del clipboard -->
+            <!-- Estado + Reloj -->
+            <div class="estado-bar">
+                <div class="estado-badge sin-guardar" id="estadoBadge">
+                    <span id="estadoPunto">●</span>
+                    <span id="estadoTexto">Sin guardar</span>
+                </div>
+                <span class="reloj" id="reloj">00:00:00</span>
+            </div>
+
+            <!-- Título -->
             <input 
                 type="text" 
                 id="tituloClipboard" 
@@ -26,12 +35,19 @@
                 style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 8px; border: 1px solid var(--border-color); background-color: var(--cuadro-bg); color: var(--texto-color); font-size: 16px;"
             >
 
-            <!-- URL generada -->
-            <div 
-                id="urlClipboard" 
-                style="width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 8px; border: 1px dashed var(--border-color); font-size: 14px; color: #888;"
-            >
-                URL: (aún no generada)
+            <!-- URL + acciones -->
+            <div class="url-acciones">
+                <div id="urlClipboard">URL: (aún no generada)</div>
+                <button class="btn-url" id="btnCopiarUrl" onclick="copiarUrl()" disabled>📋 Copiar</button>
+                <div class="compartir-menu">
+                    <button class="btn-url" id="btnCompartir" onclick="toggleCompartir()" disabled>↗ Compartir</button>
+                    <div class="compartir-dropdown" id="compartirDropdown">
+                        <a class="compartir-opcion" id="shareWhatsapp" href="#" target="_blank">💬 WhatsApp</a>
+                        <a class="compartir-opcion" id="shareGmail"    href="#" target="_blank">✉️ Gmail</a>
+                        <a class="compartir-opcion" id="shareTelegram" href="#" target="_blank">✈️ Telegram</a>
+                        <div class="compartir-opcion" onclick="shareNativo()">📤 Más opciones...</div>
+                    </div>
+                </div>
             </div>
 
             <div class="toolbar">
@@ -71,6 +87,18 @@
     <div id="spinner-overlay">
         <div class="spinner"></div>
     </div>  
+
+    <!-- Modal confirmación -->
+    <div id="modal-confirmacion">
+        <div class="modal-box">
+            <h3 id="modalTitulo">¿Estás seguro?</h3>
+            <p id="modalMensaje">Esta acción no se puede deshacer</p>
+            <div class="modal-botones">
+                <button class="btn-cancelar" onclick="cerrarModal()">Cancelar</button>
+                <button class="btn-confirmar" id="btnConfirmar">Confirmar</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Historial lateral -->
     <div id="historial-panel">

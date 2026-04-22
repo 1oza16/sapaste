@@ -3,15 +3,118 @@
 // =======================
 const API_URL = "http://192.168.3.170:5000/api/pastes";
 
-let currentPasteId = null;
+let currentPasteId    = null;
+let estaGuardado      = false;
+let callbackConfirmar = null;
+
+// =======================
+// RELOJ
+// =======================
+function iniciarReloj() {
+    function actualizar() {
+        const ahora = new Date();
+        const h = String(ahora.getHours()).padStart(2, '0');
+        const m = String(ahora.getMinutes()).padStart(2, '0');
+        const s = String(ahora.getSeconds()).padStart(2, '0');
+        document.getElementById("reloj").innerText = `${h}:${m}:${s}`;
+        actualizarTiemposHistorial();
+    }
+    actualizar();
+    setInterval(actualizar, 1000);
+}
+
+// =======================
+// ESTADO GUARDADO
+// =======================
+function setEstado(guardado) {
+    estaGuardado = guardado;
+    const badge  = document.getElementById("estadoBadge");
+    const texto  = document.getElementById("estadoTexto");
+
+    if (guardado) {
+        badge.className = "estado-badge guardado";
+        texto.innerText = "Guardado";
+    } else {
+        badge.className = "estado-badge sin-guardar";
+        texto.innerText = "Sin guardar";
+    }
+}
+
+// =======================
+// URL — copiar y compartir
+// =======================
+function activarBotonesUrl(url) {
+    document.getElementById("btnCopiarUrl").disabled  = false;
+    document.getElementById("btnCompartir").disabled  = false;
+
+    // Rellenar enlaces de compartir
+    const texto = encodeURIComponent("Mira este clipboard: " + url);
+    document.getElementById("shareWhatsapp").href  = `https://wa.me/?text=${texto}`;
+    document.getElementById("shareGmail").href     = `https://mail.google.com/mail/?view=cm&body=${texto}`;
+    document.getElementById("shareTelegram").href  = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=Mira este clipboard`;
+}
+
+function copiarUrl() {
+    const urlTexto = document.getElementById("urlClipboard").innerText.replace("URL: ", "");
+    navigator.clipboard.writeText(urlTexto).then(() => {
+        const btn = document.getElementById("btnCopiarUrl");
+        btn.innerText = "✓ Copiado";
+        btn.classList.add("copiado");
+        setTimeout(() => {
+            btn.innerText = "📋 Copiar";
+            btn.classList.remove("copiado");
+        }, 2000);
+    });
+}
+
+function toggleCompartir() {
+    document.getElementById("compartirDropdown").classList.toggle("abierto");
+}
+
+function shareNativo() {
+    const urlTexto = document.getElementById("urlClipboard").innerText.replace("URL: ", "");
+    if (navigator.share) {
+        navigator.share({ title: "SApaste", text: "Mira este clipboard", url: urlTexto });
+    } else {
+        mostrarToast("Tu navegador no soporta compartir nativo", "amarillo");
+    }
+    document.getElementById("compartirDropdown").classList.remove("abierto");
+}
+
+// Cerrar dropdown al hacer clic fuera
+document.addEventListener("click", (e) => {
+    const menu = document.getElementById("compartirDropdown");
+    if (menu && !e.target.closest(".compartir-menu")) {
+        menu.classList.remove("abierto");
+    }
+});
+
+// =======================
+// MODAL DE CONFIRMACIÓN
+// =======================
+function mostrarModal(titulo, mensaje, onConfirmar) {
+    document.getElementById("modalTitulo").innerText  = titulo;
+    document.getElementById("modalMensaje").innerText = mensaje;
+    document.getElementById("modal-confirmacion").classList.add("visible");
+    callbackConfirmar = onConfirmar;
+
+    document.getElementById("btnConfirmar").onclick = () => {
+        cerrarModal();
+        onConfirmar();
+    };
+}
+
+function cerrarModal() {
+    document.getElementById("modal-confirmacion").classList.remove("visible");
+    callbackConfirmar = null;
+}
 
 // =======================
 // NOTIFICACIONES TOAST
 // =======================
 function mostrarToast(mensaje, tipo = "verde") {
     agregarAlHistorial(mensaje, tipo);
-    
-    // Crear contenedor si no existe
+
     let contenedor = document.getElementById("toast-container");
     if (!contenedor) {
         contenedor = document.createElement("div");
@@ -30,7 +133,6 @@ function mostrarToast(mensaje, tipo = "verde") {
 
     contenedor.appendChild(toast);
 
-    // Desaparece solo a los 3 segundos
     setTimeout(() => {
         toast.style.animation = "toastSalida 0.3s ease forwards";
         setTimeout(() => toast.remove(), 300);
@@ -40,13 +142,8 @@ function mostrarToast(mensaje, tipo = "verde") {
 // =======================
 // SPINNER
 // =======================
-function mostrarSpinner() {
-    document.getElementById("spinner-overlay").classList.add("visible");
-}
-
-function ocultarSpinner() {
-    document.getElementById("spinner-overlay").classList.remove("visible");
-}
+function mostrarSpinner() { document.getElementById("spinner-overlay").classList.add("visible"); }
+function ocultarSpinner() { document.getElementById("spinner-overlay").classList.remove("visible"); }
 
 // =======================
 // EDITOR
@@ -78,7 +175,6 @@ async function guardarContenido() {
     const contenido = document.getElementById("editor").innerText.trim();
     const titulo    = document.getElementById("tituloClipboard").value.trim();
 
-    // Validaciones
     if (!titulo) {
         mostrarToast("El título es obligatorio", "amarillo");
         document.getElementById("tituloClipboard").focus();
@@ -96,11 +192,7 @@ async function guardarContenido() {
         const res = await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                content: contenido,
-                title: titulo,
-                password: null
-            })
+            body: JSON.stringify({ content: contenido, title: titulo, password: null })
         });
 
         if (!res.ok) {
@@ -111,18 +203,19 @@ async function guardarContenido() {
         const data = await res.json();
         currentPasteId = data.id;
 
-        // Mostrar URL generada
         const divUrl = document.getElementById("urlClipboard");
-        divUrl.innerText     = `URL: ${data.url}`;
-        divUrl.style.color   = "var(--texto-color)";
+        divUrl.innerText   = `URL: ${data.url}`;
+        divUrl.style.color = "var(--texto-color)";
 
+        activarBotonesUrl(data.url);
+        setEstado(true);
         mostrarToast("Paste guardado correctamente", "verde");
 
     } catch (err) {
         console.error("Error guardando:", err);
         mostrarToast("No se pudo conectar con la API", "rojo");
     } finally {
-        ocultarSpinner(); // se oculta siempre, haya error o no
+        ocultarSpinner();
     }
 }
 
@@ -146,11 +239,10 @@ async function cargarContenido() {
         }
 
         const data = await res.json();
-
         document.getElementById("editor").innerText      = data.contenido;
         document.getElementById("tituloClipboard").value = data.titulo || "";
         actualizarContador();
-
+        setEstado(true);
         mostrarToast("Paste cargado", "verde");
 
     } catch (err) {
@@ -162,39 +254,44 @@ async function cargarContenido() {
 }
 
 // =======================
-// ELIMINAR — DELETE
+// ELIMINAR — DELETE con confirmación
 // =======================
-async function eliminarPaste() {
+function eliminarPaste() {
     if (!currentPasteId) {
         mostrarToast("No hay ningún paste activo", "amarillo");
         return;
     }
 
-    mostrarSpinner();
+    mostrarModal(
+        "¿Eliminar este clipboard?",
+        "Esta acción no se puede deshacer",
+        async () => {
+            mostrarSpinner();
+            try {
+                const res = await fetch(`${API_URL}/${currentPasteId}`, { method: "DELETE" });
 
-    try {
-        const res = await fetch(`${API_URL}/${currentPasteId}`, {
-            method: "DELETE"
-        });
-
-        if (res.ok) {
-            currentPasteId = null;
-            document.getElementById("editor").innerText       = "";
-            document.getElementById("tituloClipboard").value  = "";
-            document.getElementById("urlClipboard").innerText = "URL: (aún no generada)";
-            document.getElementById("urlClipboard").style.color = "#888";
-            actualizarContador();
-            mostrarToast("Paste eliminado", "verde");
-        } else {
-            mostrarToast("No se pudo eliminar el paste", "rojo");
+                if (res.ok) {
+                    currentPasteId = null;
+                    document.getElementById("editor").innerText       = "";
+                    document.getElementById("tituloClipboard").value  = "";
+                    document.getElementById("urlClipboard").innerText = "URL: (aún no generada)";
+                    document.getElementById("urlClipboard").style.color = "#888";
+                    document.getElementById("btnCopiarUrl").disabled  = true;
+                    document.getElementById("btnCompartir").disabled  = true;
+                    actualizarContador();
+                    setEstado(false);
+                    mostrarToast("Paste eliminado", "verde");
+                } else {
+                    mostrarToast("No se pudo eliminar el paste", "rojo");
+                }
+            } catch (err) {
+                console.error("Error eliminando:", err);
+                mostrarToast("No se pudo conectar con la API", "rojo");
+            } finally {
+                ocultarSpinner();
+            }
         }
-
-    } catch (err) {
-        console.error("Error eliminando:", err);
-        mostrarToast("No se pudo conectar con la API", "rojo");
-    } finally {
-        ocultarSpinner();
-    }
+    );
 }
 
 // =======================
@@ -224,10 +321,13 @@ async function cargarDesdeUrl() {
         document.getElementById("editor").innerText      = data.contenido;
         document.getElementById("tituloClipboard").value = data.titulo || "";
 
+        const url    = window.location.href;
         const divUrl = document.getElementById("urlClipboard");
-        divUrl.innerText   = `URL: ${window.location.href}`;
+        divUrl.innerText   = `URL: ${url}`;
         divUrl.style.color = "var(--texto-color)";
 
+        activarBotonesUrl(url);
+        setEstado(true); // ya está guardado, lo estamos leyendo de la BBDD
         actualizarContador();
         mostrarToast("Paste cargado correctamente", "verde");
 
@@ -256,10 +356,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const editor = document.getElementById("editor");
     if (!editor) return;
 
-    editor.addEventListener("input", actualizarContador);
+    editor.addEventListener("input", () => {
+        actualizarContador();
+        // Si se edita el contenido después de guardarlo, vuelve a "sin guardar"
+        if (estaGuardado) setEstado(false);
+    });
+
+    iniciarReloj();
     cargarDesdeUrl();
 });
-
 
 // =======================
 // HISTORIAL
@@ -303,4 +408,4 @@ function actualizarTiemposHistorial() {
         else if (diff < 3600) el.innerText = `${Math.floor(diff / 60)}min`;
         else                  el.innerText = `${Math.floor(diff / 3600)}h`;
     });
-}
+}   

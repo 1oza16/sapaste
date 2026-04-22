@@ -120,6 +120,156 @@ header {
     font-weight: 600;
 }
 
+/* ── BOTONES URL ── */
+.url-acciones {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+#urlClipboard {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px dashed var(--border-color);
+    font-size: 14px;
+    color: #888;
+}
+
+.btn-url {
+    padding: 8px 14px;
+    border: 1px solid var(--border-color);
+    background-color: var(--cuadro-bg);
+    color: var(--texto-color);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+.btn-url:hover { border-color: #4a90d9; color: #4a90d9; }
+.btn-url:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn-url.copiado { background: #d4edda; color: #1a6630; border-color: #28a745; }
+
+/* ── ESTADO GUARDADO ── */
+.estado-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    font-size: 13px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.estado-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    transition: all 0.2s;
+}
+.estado-badge.guardado   { background: #d4edda; color: #1a6630; }
+.estado-badge.sin-guardar { background: #fff3cd; color: #856404; }
+
+body.dark-mode .estado-badge.guardado    { background: #1a3a22; color: #6fcf97; }
+body.dark-mode .estado-badge.sin-guardar { background: #3a3000; color: #ffd166; }
+
+.reloj {
+    font-size: 13px;
+    color: #888;
+    font-weight: 600;
+    font-family: monospace;
+}
+
+/* ── MODAL DE CONFIRMACIÓN ── */
+#modal-confirmacion {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 9000;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(3px);
+}
+#modal-confirmacion.visible { display: flex; }
+
+.modal-box {
+    background: var(--cuadro-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 28px 32px;
+    max-width: 380px;
+    width: 90%;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    text-align: center;
+}
+.modal-box h3 { margin: 0 0 8px; font-size: 1.1rem; }
+.modal-box p  { margin: 0 0 24px; color: #888; font-size: 14px; }
+
+.modal-botones {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+.modal-botones button {
+    padding: 9px 24px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    background: var(--cuadro-bg);
+    color: var(--texto-color);
+    transition: all 0.15s;
+}
+.btn-confirmar { background: #dc3545 !important; color: #fff !important; border-color: #dc3545 !important; }
+.btn-confirmar:hover { background: #b02a37 !important; }
+.btn-cancelar:hover  { border-color: var(--texto-color) !important; }
+
+/* ── MENÚ COMPARTIR ── */
+.compartir-menu {
+    position: relative;
+    display: inline-block;
+}
+
+.compartir-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    background: var(--cuadro-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    min-width: 180px;
+    z-index: 100;
+    overflow: hidden;
+}
+.compartir-dropdown.abierto { display: block; }
+
+.compartir-opcion {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--texto-color);
+    transition: background 0.15s;
+    text-decoration: none;
+}
+.compartir-opcion:hover { background: rgba(0,0,0,0.05); }
+body.dark-mode .compartir-opcion:hover { background: rgba(255,255,255,0.07); }
+
 /* ── NOTIFICACIONES TOAST ── */
 #toast-container {
     position: fixed;
