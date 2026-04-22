@@ -6,7 +6,7 @@
     <meta name="description" content="Proyecto basado en WEpaste">
     <link rel="stylesheet" href="Styles/style.css">
     <link rel="shortcut icon" href="img/SApasteIcon.png" type="image/x-icon">
-    <script src="Script/editor.js"></script>
+    <script src="script/editor.js"></script>
     <title>SApaste</title>
 </head>
 <body>
@@ -38,6 +38,11 @@
                 <span class="separator"></span>
 
                 <button onclick="toggleDarkMode()" id="btnDarkMode">Modo Oscuro</button>
+
+                <div class="acciones">
+                    <button onclick="guardarContenido()">Guardar</button>
+                    <button onclick="cargarContenido()">Recargar</button>
+                </div>
             </div>
 
             <div id="editor" contenteditable="true"></div>
