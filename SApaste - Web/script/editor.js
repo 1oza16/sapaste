@@ -358,8 +358,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
     editor.addEventListener("input", () => {
         actualizarContador();
-        // Si se edita el contenido después de guardarlo, vuelve a "sin guardar"
         if (estaGuardado) setEstado(false);
+    });
+
+    // Detectar tema del sistema y aplicarlo
+    const sistemaOscuro = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    if (sistemaOscuro) {
+        document.body.classList.add("dark-mode");
+        document.getElementById("btnDarkMode").innerText = "Modo Claro";
+    }
+
+    // Cambio en tiempo real si el usuario cambia el tema del sistema
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
+        const btn = document.getElementById("btnDarkMode");
+        if (e.matches) {
+            document.body.classList.add("dark-mode");
+            btn.innerText = "Modo Claro";
+        } else {
+            document.body.classList.remove("dark-mode");
+            btn.innerText = "Modo Oscuro";
+        }
     });
 
     iniciarReloj();
