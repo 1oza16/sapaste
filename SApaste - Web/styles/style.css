@@ -81,9 +81,12 @@ header {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
+    margin-top: 20px;
     margin-bottom: 15px;
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 10px;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .toolbar button {
@@ -95,6 +98,37 @@ header {
     cursor: pointer;
     font-size: 14px;
 }
+
+.toolbar-izq {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.toolbar-izq button {
+    transition: all 0.15s ease;
+}
+
+.toolbar-izq button:hover {
+    border-color: #4a90d9;
+    color: #4a90d9;
+    box-shadow: 0 4px 12px rgba(74,144,217,0.25);
+}
+
+.toolbar-der {
+    display: flex;
+    gap: 8px;
+}
+
+.toolbar-der button {
+    font-weight: 600;
+}
+
+.toolbar-der button:hover {
+    border-color: #4a90d9;
+    color: #4a90d9;
+}
+
 
 #editor {
     width: 100%;

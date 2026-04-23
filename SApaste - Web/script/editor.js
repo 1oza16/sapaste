@@ -172,7 +172,7 @@ function toggleDarkMode() {
 // GUARDAR — POST
 // =======================
 async function guardarContenido() {
-    const contenido = document.getElementById("editor").innerText.trim();
+    const contenido = document.getElementById("editor").innerHTML.trim();
     const titulo    = document.getElementById("tituloClipboard").value.trim();
 
     if (!titulo) {
@@ -181,7 +181,7 @@ async function guardarContenido() {
         return;
     }
 
-    if (!contenido) {
+    if (!document.getElementById("editor").innerText.trim()) {
         mostrarToast("Escribe algo antes de guardar", "amarillo");
         return;
     }
@@ -254,7 +254,7 @@ async function cargarContenido() {
         }
 
         const data = await res.json();
-        document.getElementById("editor").innerText      = data.contenido;
+        document.getElementById("editor").innerHTML = DOMPurify.sanitize(data.contenido);
         document.getElementById("tituloClipboard").value = data.titulo || "";
         actualizarContador();
         setEstado(true);
@@ -287,7 +287,7 @@ function eliminarPaste() {
 
                 if (res.ok) {
                     currentPasteId = null;
-                    document.getElementById("editor").innerText       = "";
+                    document.getElementById("editor").innerHTML = "";
                     document.getElementById("tituloClipboard").value  = "";
                     document.getElementById("urlClipboard").innerText = "URL: (aún no generada)";
                     document.getElementById("urlClipboard").style.color = "#888";
@@ -333,7 +333,7 @@ async function cargarDesdeUrl() {
 
         const data = await res.json();
 
-        document.getElementById("editor").innerText      = data.contenido;
+        document.getElementById("editor").innerHTML = DOMPurify.sanitize(data.contenido);
         document.getElementById("tituloClipboard").value = data.titulo || "";
 
         const url    = window.location.href;
@@ -392,6 +392,20 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
             document.body.classList.remove("dark-mode");
             btn.innerText = "Modo Oscuro";
+        }
+    });
+
+// =======================
+// ATAJOS DE TECLADO
+// =======================
+    editor.addEventListener("keydown", (e) => {
+    if (!e.ctrlKey && !e.metaKey) return;
+    
+        switch (e.key.toLowerCase()) {
+            case "b": e.preventDefault(); negrita();   break;
+            case "i": e.preventDefault(); cursiva();   break;
+            case "u": e.preventDefault(); subrayado(); break;
+            case "s": e.preventDefault(); guardarContenido(); break;
         }
     });
 
