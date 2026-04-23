@@ -28,7 +28,6 @@ C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\obj\Debug\net8.0\sta
 C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\obj\Debug\net8.0\staticwebassets.build.json.cache
 C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\obj\Debug\net8.0\staticwebassets.development.json
 C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\obj\Debug\net8.0\staticwebassets.build.endpoints.json
-C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
 C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\obj\Debug\net8.0\SApaste .31EAA54D.Up2Date
 C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\obj\Debug\net8.0\SApaste - Api.dll
 C:\Users\Loza\Documents\Borrador_1DAM\SApaste\SApaste - Api\obj\Debug\net8.0\refint\SApaste - Api.dll

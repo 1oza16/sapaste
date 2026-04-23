@@ -55,6 +55,30 @@ app.MapPost("/api/pastes", async (NewPaste newpaste) =>
     return Results.Ok(new { id, url = $"http://192.168.3.170/p/{id}" });
 });
 
+// PUT — Actualizar paste existente
+app.MapPut("/api/pastes/{id}", async (string id, NewPaste newpaste) =>
+{
+    using (var connection = new SqlConnection(connectionBBDD))
+    {
+        await connection.OpenAsync();
+
+        using (var cmd = new SqlCommand(
+            "UPDATE Pastes SET Contenido = @Contenido, Titulo = @Titulo WHERE Id = @Id", connection))
+        {
+            cmd.Parameters.AddWithValue("@Id",        id);
+            cmd.Parameters.AddWithValue("@Contenido", newpaste.content);
+            cmd.Parameters.AddWithValue("@Titulo",    newpaste.title ?? "Sin título");
+
+            int filasAfectadas = await cmd.ExecuteNonQueryAsync();
+
+            if (filasAfectadas == 0)
+                return Results.NotFound("Paste no encontrado");
+
+            return Results.Ok(new { id, url = $"http://192.168.3.170/p/{id}" });
+        }
+    }
+});
+
 // GET — Leer paste
 app.MapGet("api/pastes/{id}", async (string id) =>
 {
