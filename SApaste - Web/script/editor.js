@@ -189,11 +189,23 @@ async function guardarContenido() {
     mostrarSpinner();
 
     try {
-        const res = await fetch(API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ content: contenido, title: titulo, password: null })
-        });
+        let res;
+
+        if (currentPasteId) {
+            // Ya existe — actualizamos con PUT
+            res = await fetch(`${API_URL}/${currentPasteId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ content: contenido, title: titulo, password: null })
+            });
+        } else {
+            // No existe — creamos con POST
+            res = await fetch(API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ content: contenido, title: titulo, password: null })
+            });
+        }
 
         if (!res.ok) {
             mostrarToast("Error al guardar el paste", "rojo");
@@ -209,7 +221,10 @@ async function guardarContenido() {
 
         activarBotonesUrl(data.url);
         setEstado(true);
-        mostrarToast("Paste guardado correctamente", "verde");
+        mostrarToast(
+            currentPasteId ? "Paste actualizado correctamente" : "Paste guardado correctamente",
+            "verde"
+        );
 
     } catch (err) {
         console.error("Error guardando:", err);
