@@ -43,10 +43,11 @@ app.MapPost("/api/pastes", async (NewPaste newpaste) =>
         await connection.OpenAsync(); // abrir conexión
 
         using (var query = new SqlCommand(
-                "INSERT INTO Pastes (Id, Contenido) VALUES (@Id, @Contenido)", connection))
+            "INSERT INTO Pastes (Id, Contenido, Titulo) VALUES (@Id, @Contenido, @Titulo)", connection))
         {
-            query.Parameters.AddWithValue("@Id", id);
+            query.Parameters.AddWithValue("@Id",       id);
             query.Parameters.AddWithValue("@Contenido", newpaste.content);
+            query.Parameters.AddWithValue("@Titulo",    newpaste.title ?? "Sin título");
             await query.ExecuteNonQueryAsync();
         }
     }

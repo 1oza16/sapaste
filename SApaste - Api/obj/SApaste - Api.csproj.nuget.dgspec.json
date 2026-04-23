@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Loza\\Documents\\Borrador_1DAM\\SApaste\\SApaste - Api\\SApaste - Api.csproj": {}
+    "C:\\Users\\Loza\\Documents\\Borrador_1DAM\\sapaste\\SApaste - Api\\SApaste - Api.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Loza\\Documents\\Borrador_1DAM\\SApaste\\SApaste - Api\\SApaste - Api.csproj": {
+    "C:\\Users\\Loza\\Documents\\Borrador_1DAM\\sapaste\\SApaste - Api\\SApaste - Api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Loza\\Documents\\Borrador_1DAM\\SApaste\\SApaste - Api\\SApaste - Api.csproj",
+        "projectUniqueName": "C:\\Users\\Loza\\Documents\\Borrador_1DAM\\sapaste\\SApaste - Api\\SApaste - Api.csproj",
         "projectName": "SApaste - Api",
-        "projectPath": "C:\\Users\\Loza\\Documents\\Borrador_1DAM\\SApaste\\SApaste - Api\\SApaste - Api.csproj",
+        "projectPath": "C:\\Users\\Loza\\Documents\\Borrador_1DAM\\sapaste\\SApaste - Api\\SApaste - Api.csproj",
         "packagesPath": "C:\\Users\\Loza\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Loza\\Documents\\Borrador_1DAM\\SApaste\\SApaste - Api\\obj\\",
+        "outputPath": "C:\\Users\\Loza\\Documents\\Borrador_1DAM\\sapaste\\SApaste - Api\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

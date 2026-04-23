@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Q6y2PltuLBw=",
+  "dgSpecHash": "w7Vwi9+TISw=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Loza\\Documents\\Borrador_1DAM\\SApaste\\SApaste - Api\\SApaste - Api.csproj",
+  "projectFilePath": "C:\\Users\\Loza\\Documents\\Borrador_1DAM\\sapaste\\SApaste - Api\\SApaste - Api.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Loza\\.nuget\\packages\\azure.core\\1.50.0\\azure.core.1.50.0.nupkg.sha512",
     "C:\\Users\\Loza\\.nuget\\packages\\azure.identity\\1.17.1\\azure.identity.1.17.1.nupkg.sha512",
