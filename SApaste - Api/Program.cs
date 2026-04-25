@@ -27,8 +27,13 @@ string? connectionBBDD = builder.Configuration.GetConnectionString("Default");
 #region Endpoints
 
 // POST — Crear paste
-app.MapPost("/api/pastes", async (NewPaste newpaste) =>
+app.MapPost("/api/pastes", async (NewPaste newpaste, HttpContext http) =>
 {
+    string? password = http.Request.Headers["X-Paste-Password"].FirstOrDefault();
+    string? hashedPassword = !string.IsNullOrEmpty(password)
+        ? BCrypt.Net.BCrypt.HashPassword(password)
+        : null;
+        
     // Comprobar contenido recibido
     if (string.IsNullOrWhiteSpace(newpaste.content))
     {
@@ -50,9 +55,6 @@ app.MapPost("/api/pastes", async (NewPaste newpaste) =>
             query.Parameters.AddWithValue("@Contenido",   newpaste.content);
             query.Parameters.AddWithValue("@Titulo",      newpaste.title ?? "Sin título");
             query.Parameters.AddWithValue("@Visibilidad", newpaste.visibilidad ?? "publico");
-            string? hashedPassword = newpaste.password != null 
-                ? BCrypt.Net.BCrypt.HashPassword(newpaste.password) 
-                : null;
             query.Parameters.AddWithValue("@Password", (object?)hashedPassword ?? DBNull.Value);
             await query.ExecuteNonQueryAsync();
         }
@@ -62,8 +64,10 @@ app.MapPost("/api/pastes", async (NewPaste newpaste) =>
 });
 
 // PUT — Actualizar paste existente
-app.MapPut("/api/pastes/{id}", async (string id, NewPaste newpaste) =>
+app.MapPut("/api/pastes/{id}", async (string id, NewPaste newpaste, HttpContext http) =>
 {
+    string? password = http.Request.Headers["X-Paste-Password"].FirstOrDefault();
+
     using (var connection = new SqlConnection(connectionBBDD))
     {
         await connection.OpenAsync();
@@ -91,10 +95,11 @@ app.MapPut("/api/pastes/{id}", async (string id, NewPaste newpaste) =>
         // Si es privado (invitados o estricto), validar contraseña
         if (visibilidad != "publico")
         {
-            if (string.IsNullOrEmpty(newpaste.password) || storedHash == null)
+            if (string.IsNullOrEmpty(password) || storedHash == null)
                 return Results.Unauthorized();
 
-            bool passwordCorrecta = BCrypt.Net.BCrypt.Verify(newpaste.password, storedHash);
+            bool passwordCorrecta = BCrypt.Net.BCrypt.Verify(password, storedHash);
+
             if (!passwordCorrecta)
                 return Results.Unauthorized();
         }
@@ -117,8 +122,10 @@ app.MapPut("/api/pastes/{id}", async (string id, NewPaste newpaste) =>
 });
 
 // GET — Leer paste
-app.MapGet("api/pastes/{id}", async (string id, string? password, HttpContext http) =>
+app.MapGet("api/pastes/{id}", async (string id, HttpContext http) =>
 {
+    string? password = http.Request.Headers["X-Paste-Password"].FirstOrDefault();
+    
     using (var connection = new SqlConnection(connectionBBDD))
     {
         await connection.OpenAsync();
@@ -158,26 +165,50 @@ app.MapGet("api/pastes/{id}", async (string id, string? password, HttpContext ht
 });
 
 // DELETE — Eliminar paste
-app.MapDelete("/api/pastes/{id}", async (string id) =>
+app.MapDelete("/api/pastes/{id}", async (string id, HttpContext http) =>
 {
-    // Abrimos conexión
+    string? password = http.Request.Headers["X-Paste-Password"].FirstOrDefault();
+
     using (var connection = new SqlConnection(connectionBBDD))
     {
         await connection.OpenAsync();
 
-        // Preparamos la query para borrar
+        // Verificar contraseña si es privado
+        string? storedHash  = null;
+        string? visibilidad = null;
+
+        using (var check = new SqlCommand(
+            "SELECT Password, Visibilidad FROM Pastes WHERE Id = @Id", connection))
+        {
+            check.Parameters.AddWithValue("@Id", id);
+            using (var reader = await check.ExecuteReaderAsync())
+            {
+                if (!await reader.ReadAsync())
+                    return Results.NotFound("Paste no encontrado");
+
+                storedHash  = reader.IsDBNull(reader.GetOrdinal("Password")) ? null : reader.GetString(reader.GetOrdinal("Password"));
+                visibilidad = reader.GetString(reader.GetOrdinal("Visibilidad"));
+            }
+        }
+
+        if (visibilidad != "publico")
+        {
+            if (string.IsNullOrEmpty(password) || storedHash == null)
+                return Results.Unauthorized();
+
+            if (!BCrypt.Net.BCrypt.Verify(password, storedHash))
+                return Results.Unauthorized();
+        }
+
+        // Borrar
         using (var cmd = new SqlCommand("DELETE FROM Pastes WHERE Id = @Id", connection))
         {
             cmd.Parameters.AddWithValue("@Id", id);
-
-            // Ejecutamos y obtenemos el número de filas afectadas
             int filasAfectadas = await cmd.ExecuteNonQueryAsync();
 
-            // En caso de que no se borre nada, el paste no existe
             if (filasAfectadas == 0)
                 return Results.NotFound("Paste no encontrado");
 
-            // En caso de que se borre correctamente
             return Results.Ok("Paste eliminado");
         }
     }
@@ -187,4 +218,4 @@ app.MapDelete("/api/pastes/{id}", async (string id) =>
 
 app.Run();
 
-record NewPaste(string content, string? title, string? password, string? visibilidad);
+record NewPaste(string content, string? title, string? visibilidad);
