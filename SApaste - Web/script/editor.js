@@ -6,6 +6,9 @@ const API_URL = "http://192.168.3.170:5000/api/pastes";
 let currentPasteId    = null;
 let estaGuardado      = false;
 let callbackConfirmar = null;
+let modoVisibilidad   = "publico";
+let passwordActual    = null;
+let soloLectura       = false;
 
 // =======================
 // RELOJ
@@ -172,8 +175,7 @@ function toggleDarkMode() {
 // GUARDAR — POST
 // =======================
 async function guardarContenido() {
-    const contenido = document.getElementById("editor").innerHTML.trim();
-    const titulo    = document.getElementById("tituloClipboard").value.trim();
+    const titulo = document.getElementById("tituloClipboard").value.trim();
 
     if (!titulo) {
         mostrarToast("El título es obligatorio", "amarillo");
@@ -186,29 +188,75 @@ async function guardarContenido() {
         return;
     }
 
-    mostrarSpinner();
+    // Si ya existe y es privado, pedimos contraseña directamente
+    if (currentPasteId) {
+        await ejecutarGuardado(modoVisibilidad, passwordActual);
+        return;
+    }
 
+    // Primer guardado — mostrar modal de visibilidad
+    abrirModalVisibilidad();
+}
+
+function abrirModalVisibilidad() {
+    document.getElementById("modal-visibilidad").classList.add("visible");
+
+    // Mostrar/ocultar campo contraseña al cambiar radio
+    document.querySelectorAll("input[name='visibilidad']").forEach(r => {
+        r.addEventListener("change", () => {
+            const necesitaPass = r.value !== "publico";
+            document.getElementById("vis-password-campo").style.display = necesitaPass ? "block" : "none";
+        });
+    });
+}
+
+function cerrarModalVisibilidad() {
+    document.getElementById("modal-visibilidad").classList.remove("visible");
+    document.getElementById("vis-password-input").value = "";
+    document.getElementById("vis-password-campo").style.display = "none";
+    document.querySelector("input[name='visibilidad'][value='publico']").checked = true;
+}
+
+async function confirmarGuardado() {
+    const vis  = document.querySelector("input[name='visibilidad']:checked").value;
+    const pass = document.getElementById("vis-password-input").value.trim();
+
+    if (vis !== "publico" && !pass) {
+        mostrarToast("Introduce una contraseña para este modo", "amarillo");
+        document.getElementById("vis-password-input").focus();
+        return;
+    }
+
+    cerrarModalVisibilidad();
+    modoVisibilidad = vis;
+    passwordActual  = pass || null;
+    await ejecutarGuardado(vis, passwordActual);
+}
+
+async function ejecutarGuardado(visibilidad, password) {
+    const contenido = document.getElementById("editor").innerHTML.trim();
+    const titulo    = document.getElementById("tituloClipboard").value.trim();
+
+    mostrarSpinner();
     try {
         let res;
-
         if (currentPasteId) {
-            // Ya existe — actualizamos con PUT
             res = await fetch(`${API_URL}/${currentPasteId}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ content: contenido, title: titulo, password: null })
+                body: JSON.stringify({ content: contenido, title: titulo, password, visibilidad })
             });
         } else {
-            // No existe — creamos con POST
             res = await fetch(API_URL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ content: contenido, title: titulo, password: null })
+                body: JSON.stringify({ content: contenido, title: titulo, password, visibilidad })
             });
         }
 
         if (!res.ok) {
-            mostrarToast("Error al guardar el paste", "rojo");
+            const msg = currentPasteId ? "Contraseña incorrecta o error al guardar" : "Error al guardar el paste";
+            mostrarToast(msg, "rojo");
             return;
         }
 
@@ -221,10 +269,7 @@ async function guardarContenido() {
 
         activarBotonesUrl(data.url);
         setEstado(true);
-        mostrarToast(
-            currentPasteId ? "Paste actualizado correctamente" : "Paste guardado correctamente",
-            "verde"
-        );
+        mostrarToast("Paste guardado correctamente", "verde");
 
     } catch (err) {
         console.error("Error guardando:", err);
@@ -332,19 +377,21 @@ async function cargarDesdeUrl() {
         }
 
         const data = await res.json();
+        modoVisibilidad = data.visibilidad;
 
-        document.getElementById("editor").innerHTML = DOMPurify.sanitize(data.contenido);
-        document.getElementById("tituloClipboard").value = data.titulo || "";
+        // Privado estricto sin contraseña → mostrar pantalla de login
+        if (data.visibilidad === "estricto") {
+            mostrarPantallaLogin(id);
+            return;
+        }
 
-        const url    = window.location.href;
-        const divUrl = document.getElementById("urlClipboard");
-        divUrl.innerText   = `URL: ${url}`;
-        divUrl.style.color = "var(--texto-color)";
+        // Privado con invitados → cargar contenido pero bloquear edición
+        if (data.visibilidad === "invitados") {
+            soloLectura = true;
+            bloquearEditor();
+        }
 
-        activarBotonesUrl(url);
-        setEstado(true); // ya está guardado, lo estamos leyendo de la BBDD
-        actualizarContador();
-        mostrarToast("Paste cargado correctamente", "verde");
+        cargarDatosEnEditor(data);
 
     } catch (err) {
         console.error("Error cargando desde URL:", err);
@@ -352,6 +399,80 @@ async function cargarDesdeUrl() {
     } finally {
         ocultarSpinner();
     }
+}
+
+function mostrarPantallaLogin(id) {
+    ocultarSpinner();
+    document.querySelector(".CuadroTexto").innerHTML = `
+        <div style="text-align:center; padding: 40px 20px;">
+            <div style="font-size: 48px; margin-bottom: 16px;">🔒</div>
+            <h2 style="margin-bottom: 8px;">Paste protegido</h2>
+            <p style="color:#888; margin-bottom: 24px;">Introduce la contraseña para acceder</p>
+            <input 
+                type="password" 
+                id="login-password"
+                placeholder="Contraseña..."
+                style="width:100%; max-width:320px; padding:12px; border-radius:8px; border:1px solid var(--border-color); background:var(--cuadro-bg); color:var(--texto-color); font-size:15px; display:block; margin: 0 auto 12px;"
+            >
+            <button 
+                onclick="intentarAcceso('${id}')"
+                style="padding:10px 28px; background:#4a90d9; color:#fff; border:none; border-radius:8px; font-size:15px; font-weight:700; cursor:pointer;">
+                Acceder
+            </button>
+        </div>
+    `;
+}
+
+async function intentarAcceso(id) {
+    const pass = document.getElementById("login-password").value.trim();
+    if (!pass) {
+        mostrarToast("Introduce la contraseña", "amarillo");
+        return;
+    }
+
+    mostrarSpinner();
+    try {
+        const res = await fetch(`${API_URL}/${id}?password=${encodeURIComponent(pass)}`);
+        if (!res.ok) {
+            mostrarToast("Contraseña incorrecta", "rojo");
+            return;
+        }
+
+        const data = await res.json();
+        passwordActual = pass;
+
+        // Restaurar el editor normal
+        location.reload(); // lo más limpio: recargar con la contraseña en sessionStorage
+    } catch (err) {
+        mostrarToast("No se pudo conectar con la API", "rojo");
+    } finally {
+        ocultarSpinner();
+    }
+}
+
+function bloquearEditor() {
+    document.getElementById("editor").contentEditable = "false";
+    document.getElementById("tituloClipboard").disabled = true;
+    document.querySelector(".toolbar").style.opacity = "0.4";
+    document.querySelector(".toolbar").style.pointerEvents = "none";
+    document.querySelector(".acciones").style.opacity    = "0.4";
+    document.querySelector(".acciones").style.pointerEvents = "none";
+    mostrarToast("Modo lectura — necesitas contraseña para editar", "amarillo");
+}
+
+function cargarDatosEnEditor(data) {
+    document.getElementById("editor").innerHTML       = DOMPurify.sanitize(data.contenido);
+    document.getElementById("tituloClipboard").value  = data.titulo || "";
+
+    const url    = window.location.href;
+    const divUrl = document.getElementById("urlClipboard");
+    divUrl.innerText   = `URL: ${url}`;
+    divUrl.style.color = "var(--texto-color)";
+
+    activarBotonesUrl(url);
+    setEstado(true);
+    actualizarContador();
+    mostrarToast("Paste cargado correctamente", "verde");
 }
 
 // =======================
