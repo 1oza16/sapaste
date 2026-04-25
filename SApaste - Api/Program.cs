@@ -43,11 +43,13 @@ app.MapPost("/api/pastes", async (NewPaste newpaste) =>
         await connection.OpenAsync(); // abrir conexión
 
         using (var query = new SqlCommand(
-            "INSERT INTO Pastes (Id, Contenido, Titulo) VALUES (@Id, @Contenido, @Titulo)", connection))
+            "INSERT INTO Pastes (Id, Contenido, Titulo, Visibilidad, Password) VALUES (@Id, @Contenido, @Titulo, @Visibilidad, @Password)", connection))
         {
-            query.Parameters.AddWithValue("@Id",       id);
-            query.Parameters.AddWithValue("@Contenido", newpaste.content);
-            query.Parameters.AddWithValue("@Titulo",    newpaste.title ?? "Sin título");
+            query.Parameters.AddWithValue("@Id",          id);
+            query.Parameters.AddWithValue("@Contenido",   newpaste.content);
+            query.Parameters.AddWithValue("@Titulo",      newpaste.title ?? "Sin título");
+            query.Parameters.AddWithValue("@Visibilidad", newpaste.visibilidad ?? "publico");
+            query.Parameters.AddWithValue("@Password",    (object?)newpaste.password ?? DBNull.Value);
             await query.ExecuteNonQueryAsync();
         }
     }
@@ -63,11 +65,12 @@ app.MapPut("/api/pastes/{id}", async (string id, NewPaste newpaste) =>
         await connection.OpenAsync();
 
         using (var cmd = new SqlCommand(
-            "UPDATE Pastes SET Contenido = @Contenido, Titulo = @Titulo WHERE Id = @Id", connection))
+            "UPDATE Pastes SET Contenido = @Contenido, Titulo = @Titulo WHERE Id = @Id AND Password = @Password", connection))
         {
             cmd.Parameters.AddWithValue("@Id",        id);
             cmd.Parameters.AddWithValue("@Contenido", newpaste.content);
             cmd.Parameters.AddWithValue("@Titulo",    newpaste.title ?? "Sin título");
+            cmd.Parameters.AddWithValue("@Password",  (object?)newpaste.password ?? DBNull.Value);
 
             int filasAfectadas = await cmd.ExecuteNonQueryAsync();
 
@@ -104,8 +107,10 @@ app.MapGet("api/pastes/{id}", async (string id) =>
                 // Obtención del contenido y titulo del clipboard
                 string contenido = reader.GetString(reader.GetOrdinal("Contenido"));
                 string titulo    = reader.GetString(reader.GetOrdinal("Titulo"));
-
-                return Results.Ok(new { id, contenido, titulo });
+                string visibilidad = reader.GetString(reader.GetOrdinal("Visibilidad"));
+                bool tienePassword = !reader.IsDBNull(reader.GetOrdinal("Password"));
+                
+                return Results.Ok(new { id, contenido, titulo, visibilidad, tienePassword });
             }
         }
     }
@@ -141,4 +146,4 @@ app.MapDelete("/api/pastes/{id}", async (string id) =>
 
 app.Run();
 
-record NewPaste(string content, string? title, string? password);
+record NewPaste(string content, string? title, string? password, string? visibilidad);
