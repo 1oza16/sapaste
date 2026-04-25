@@ -1,4 +1,5 @@
 using Microsoft.Data.SqlClient;
+using BCrypt.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
@@ -49,7 +50,10 @@ app.MapPost("/api/pastes", async (NewPaste newpaste) =>
             query.Parameters.AddWithValue("@Contenido",   newpaste.content);
             query.Parameters.AddWithValue("@Titulo",      newpaste.title ?? "Sin título");
             query.Parameters.AddWithValue("@Visibilidad", newpaste.visibilidad ?? "publico");
-            query.Parameters.AddWithValue("@Password",    (object?)newpaste.password ?? DBNull.Value);
+            string? hashedPassword = newpaste.password != null 
+                ? BCrypt.Net.BCrypt.HashPassword(newpaste.password) 
+                : null;
+            query.Parameters.AddWithValue("@Password", (object?)hashedPassword ?? DBNull.Value);
             await query.ExecuteNonQueryAsync();
         }
     }
@@ -64,16 +68,46 @@ app.MapPut("/api/pastes/{id}", async (string id, NewPaste newpaste) =>
     {
         await connection.OpenAsync();
 
+        // Primero comprobamos si el paste existe y obtenemos su password
+        string? storedHash = null;
+        string? visibilidad = null;
+
+        using (var check = new SqlCommand(
+            "SELECT Password, Visibilidad FROM Pastes WHERE Id = @Id", connection))
+        {
+            check.Parameters.AddWithValue("@Id", id);
+            using (var reader = await check.ExecuteReaderAsync())
+            {
+                if (!await reader.ReadAsync())
+                    return Results.NotFound("Paste no encontrado");
+
+                storedHash  = reader.IsDBNull(reader.GetOrdinal("Password")) 
+                    ? null 
+                    : reader.GetString(reader.GetOrdinal("Password"));
+                visibilidad = reader.GetString(reader.GetOrdinal("Visibilidad"));
+            }
+        }
+
+        // Si es privado (invitados o estricto), validar contraseña
+        if (visibilidad != "publico")
+        {
+            if (string.IsNullOrEmpty(newpaste.password) || storedHash == null)
+                return Results.Unauthorized();
+
+            bool passwordCorrecta = BCrypt.Net.BCrypt.Verify(newpaste.password, storedHash);
+            if (!passwordCorrecta)
+                return Results.Unauthorized();
+        }
+
+        // Contraseña válida — actualizar contenido
         using (var cmd = new SqlCommand(
-            "UPDATE Pastes SET Contenido = @Contenido, Titulo = @Titulo WHERE Id = @Id AND Password = @Password", connection))
+            "UPDATE Pastes SET Contenido = @Contenido, Titulo = @Titulo WHERE Id = @Id", connection))
         {
             cmd.Parameters.AddWithValue("@Id",        id);
             cmd.Parameters.AddWithValue("@Contenido", newpaste.content);
             cmd.Parameters.AddWithValue("@Titulo",    newpaste.title ?? "Sin título");
-            cmd.Parameters.AddWithValue("@Password",  (object?)newpaste.password ?? DBNull.Value);
 
             int filasAfectadas = await cmd.ExecuteNonQueryAsync();
-
             if (filasAfectadas == 0)
                 return Results.NotFound("Paste no encontrado");
 
@@ -83,33 +117,40 @@ app.MapPut("/api/pastes/{id}", async (string id, NewPaste newpaste) =>
 });
 
 // GET — Leer paste
-app.MapGet("api/pastes/{id}", async (string id) =>
+app.MapGet("api/pastes/{id}", async (string id, string? password, HttpContext http) =>
 {
-    // Abrimos conexion a BBDD
     using (var connection = new SqlConnection(connectionBBDD))
     {
-        // Espera a apertura de conexion
         await connection.OpenAsync();
 
-        // Consulta a BBDD por ID
         using (var query = new SqlCommand("SELECT * FROM Pastes WHERE Id = @Id", connection))
         {
             query.Parameters.AddWithValue("@Id", id);
 
             using (var reader = await query.ExecuteReaderAsync())
             {
-                // Advertencia en caso de no encontrar ID en BBDD
                 if (!await reader.ReadAsync())
-                {
                     return Results.NotFound("ID de clipboard no encontrado");
+
+                string  contenido   = reader.GetString(reader.GetOrdinal("Contenido"));
+                string  titulo      = reader.GetString(reader.GetOrdinal("Titulo"));
+                string  visibilidad = reader.GetString(reader.GetOrdinal("Visibilidad"));
+                string? storedHash  = reader.IsDBNull(reader.GetOrdinal("Password")) 
+                    ? null 
+                    : reader.GetString(reader.GetOrdinal("Password"));
+                bool tienePassword  = storedHash != null;
+
+                // Paste estricto — contraseña obligatoria
+                if (visibilidad == "estricto")
+                {
+                    if (string.IsNullOrEmpty(password) || storedHash == null)
+                        return Results.Unauthorized();
+
+                    bool ok = BCrypt.Net.BCrypt.Verify(password, storedHash);
+                    if (!ok)
+                        return Results.Unauthorized();
                 }
 
-                // Obtención del contenido y titulo del clipboard
-                string contenido = reader.GetString(reader.GetOrdinal("Contenido"));
-                string titulo    = reader.GetString(reader.GetOrdinal("Titulo"));
-                string visibilidad = reader.GetString(reader.GetOrdinal("Visibilidad"));
-                bool tienePassword = !reader.IsDBNull(reader.GetOrdinal("Password"));
-                
                 return Results.Ok(new { id, contenido, titulo, visibilidad, tienePassword });
             }
         }
