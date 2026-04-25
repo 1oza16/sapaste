@@ -112,6 +112,39 @@ function cerrarModal() {
     callbackConfirmar = null;
 }
 
+function mostrarModalPassword(titulo, onConfirmar) {
+    document.getElementById("modalTitulo").innerText  = titulo;
+    document.getElementById("modalMensaje").innerText = "Introduce la contraseña del paste";
+    
+    // Insertar input de contraseña en el modal existente
+    const box = document.querySelector(".modal-box");
+    let input = document.getElementById("modal-password-input");
+    if (!input) {
+        input = document.createElement("input");
+        input.type        = "password";
+        input.id          = "modal-password-input";
+        input.placeholder = "Contraseña...";
+        input.style.cssText = "width:100%; padding:10px; border-radius:8px; border:1px solid var(--border-color); background:var(--cuadro-bg); color:var(--texto-color); font-size:14px; margin-bottom:16px;";
+        // Insertar antes de los botones
+        box.insertBefore(input, box.querySelector(".modal-botones"));
+    }
+    input.value = "";
+
+    document.getElementById("modal-confirmacion").classList.add("visible");
+
+    document.getElementById("btnConfirmar").onclick = () => {
+        const pass = input.value.trim();
+        if (!pass) {
+            mostrarToast("Introduce la contraseña", "amarillo");
+            return;
+        }
+        // Limpiar y quitar el input al cerrar
+        cerrarModal();
+        input.remove();
+        onConfirmar(pass);
+    };
+}
+
 // =======================
 // NOTIFICACIONES TOAST
 // =======================
@@ -322,25 +355,50 @@ function eliminarPaste() {
         return;
     }
 
+    // Si es privado y no tenemos contraseña en memoria, pedirla primero
+    if (modoVisibilidad !== "publico" && !passwordActual) {
+        mostrarModalPassword("Contraseña para eliminar", async (pass) => {
+            passwordActual = pass;
+            confirmarEliminar();
+        });
+        return;
+    }
+
+    confirmarEliminar();
+}
+
+function confirmarEliminar() {
     mostrarModal(
         "¿Eliminar este clipboard?",
         "Esta acción no se puede deshacer",
         async () => {
             mostrarSpinner();
             try {
-                const res = await fetch(`${API_URL}/${currentPasteId}`, { method: "DELETE" });
+                const headers = { "Content-Type": "application/json" };
+                if (passwordActual) headers["X-Paste-Password"] = passwordActual;
+
+                const res = await fetch(`${API_URL}/${currentPasteId}`, {
+                    method: "DELETE",
+                    headers
+                });
 
                 if (res.ok) {
-                    currentPasteId = null;
-                    document.getElementById("editor").innerHTML = "";
-                    document.getElementById("tituloClipboard").value  = "";
-                    document.getElementById("urlClipboard").innerText = "URL: (aún no generada)";
+                    currentPasteId  = null;
+                    passwordActual  = null;
+                    modoVisibilidad = "publico";
+                    soloLectura     = false;
+                    document.getElementById("editor").innerHTML         = "";
+                    document.getElementById("tituloClipboard").value    = "";
+                    document.getElementById("urlClipboard").innerText   = "URL: (aún no generada)";
                     document.getElementById("urlClipboard").style.color = "#888";
-                    document.getElementById("btnCopiarUrl").disabled  = true;
-                    document.getElementById("btnCompartir").disabled  = true;
+                    document.getElementById("btnCopiarUrl").disabled    = true;
+                    document.getElementById("btnCompartir").disabled    = true;
                     actualizarContador();
                     setEstado(false);
                     mostrarToast("Paste eliminado", "verde");
+                } else if (res.status === 401) {
+                    passwordActual = null; // contraseña incorrecta, limpiar
+                    mostrarToast("Contraseña incorrecta", "rojo");
                 } else {
                     mostrarToast("No se pudo eliminar el paste", "rojo");
                 }
@@ -365,6 +423,14 @@ async function cargarDesdeUrl() {
     if (!id) return;
 
     currentPasteId = id;
+
+    // Recuperar contraseña si venimos de un reload tras login
+    const savedPass = sessionStorage.getItem(`password_${id}`);
+    if (savedPass) {
+        passwordActual = savedPass;
+        sessionStorage.removeItem(`password_${id}`); // limpiar tras recuperar
+    }
+
     mostrarSpinner();
 
     try {
@@ -381,14 +447,14 @@ async function cargarDesdeUrl() {
 
         // Privado estricto sin contraseña → mostrar pantalla de login
         if (data.visibilidad === "estricto") {
-            mostrarPantallaLogin(id);
+            mostrarPantallaLogin(id, false); // sin opción invitado
             return;
         }
 
         // Privado con invitados → cargar contenido pero bloquear edición
         if (data.visibilidad === "invitados") {
-            soloLectura = true;
-            bloquearEditor();
+            mostrarPantallaLogin(id, true); // con opción invitado
+            return;
         }
 
         cargarDatosEnEditor(data);
@@ -401,26 +467,77 @@ async function cargarDesdeUrl() {
     }
 }
 
-function mostrarPantallaLogin(id) {
+function mostrarPantallaLogin(id, conOpcionInvitado = false) {
     ocultarSpinner();
-    document.querySelector(".CuadroTexto").innerHTML = `
-        <div style="text-align:center; padding: 40px 20px;">
-            <div style="font-size: 48px; margin-bottom: 16px;">🔒</div>
-            <h2 style="margin-bottom: 8px;">Paste protegido</h2>
-            <p style="color:#888; margin-bottom: 24px;">Introduce la contraseña para acceder</p>
-            <input 
-                type="password" 
+
+    const botonInvitado = conOpcionInvitado ? `
+        <button
+            onclick="entrarComoInvitado()"
+            style="padding:10px 28px; background:var(--cuadro-bg); color:var(--texto-color); border:1px solid var(--border-color); border-radius:8px; font-size:15px; font-weight:700; cursor:pointer;">
+            👁 Entrar como invitado
+        </button>
+    ` : "";
+
+    // Crear overlay igual que los otros modales
+    const overlay = document.createElement("div");
+    overlay.id = "modal-login";
+    overlay.style.cssText = `
+        position: fixed; inset: 0;
+        background: rgba(0,0,0,0.4);
+        z-index: 9000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(3px);
+    `;
+
+    overlay.innerHTML = `
+        <div class="modal-box" style="max-width: 600px; width: 90%;">
+            <div style="font-size: 36px; margin-bottom: 12px;">🔒︎</div>
+            <h3 style="margin: 0 0 8px;">Paste protegido</h3>
+            <p style="color:#888; font-size:14px; margin: 0 0 20px;">
+                ${conOpcionInvitado
+                    ? "Introduce la contraseña para editar, o entra como invitado para solo ver"
+                    : "Introduce la contraseña para acceder"}
+            </p>
+            <input
+                type="password"
                 id="login-password"
                 placeholder="Contraseña..."
-                style="width:100%; max-width:320px; padding:12px; border-radius:8px; border:1px solid var(--border-color); background:var(--cuadro-bg); color:var(--texto-color); font-size:15px; display:block; margin: 0 auto 12px;"
+                style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border-color); background:var(--cuadro-bg); color:var(--texto-color); font-size:14px; margin-bottom:20px;"
             >
-            <button 
-                onclick="intentarAcceso('${id}')"
-                style="padding:10px 28px; background:#4a90d9; color:#fff; border:none; border-radius:8px; font-size:15px; font-weight:700; cursor:pointer;">
-                Acceder
-            </button>
+            <div class="modal-botones">
+                <button class="btn-cancelar" onclick="window.history.back()">Cancelar</button>
+                ${botonInvitado}
+                <button
+                    onclick="intentarAcceso('${id}')"
+                    style="padding:9px 24px; background:#4a90d9; color:#fff; border:none; border-radius:8px; font-size:14px; font-weight:700; cursor:pointer;">
+                    Acceder
+                </button>
+            </div>
         </div>
     `;
+
+    document.body.appendChild(overlay);
+
+    // Enter para confirmar
+    overlay.querySelector("#login-password").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") intentarAcceso(id);
+    });
+}
+
+function entrarComoInvitado() {
+    soloLectura = true;
+    // Cargar el contenido desde la API (sin contraseña, es invitado así que el GET lo permite)
+    mostrarSpinner();
+    fetch(`${API_URL}/${currentPasteId}`)
+        .then(res => res.json())
+        .then(data => {
+            cargarDatosEnEditor(data);
+            bloquearEditor();
+        })
+        .catch(() => mostrarToast("No se pudo conectar con la API", "rojo"))
+        .finally(() => ocultarSpinner());
 }
 
 async function intentarAcceso(id) {
@@ -432,17 +549,18 @@ async function intentarAcceso(id) {
 
     mostrarSpinner();
     try {
-        const res = await fetch(`${API_URL}/${id}?password=${encodeURIComponent(pass)}`);
+        const res = await fetch(`${API_URL}/${id}`, {
+            headers: { "X-Paste-Password": pass }
+        });
         if (!res.ok) {
             mostrarToast("Contraseña incorrecta", "rojo");
             return;
         }
 
-        const data = await res.json();
-        passwordActual = pass;
+        // Guardar en sessionStorage antes del reload — sobrevive la recarga
+        sessionStorage.setItem(`password_${id}`, pass);
+        location.reload();
 
-        // Restaurar el editor normal
-        location.reload(); // lo más limpio: recargar con la contraseña en sessionStorage
     } catch (err) {
         mostrarToast("No se pudo conectar con la API", "rojo");
     } finally {
@@ -450,13 +568,16 @@ async function intentarAcceso(id) {
     }
 }
 
+
 function bloquearEditor() {
-    document.getElementById("editor").contentEditable = "false";
-    document.getElementById("tituloClipboard").disabled = true;
-    document.querySelector(".toolbar").style.opacity = "0.4";
-    document.querySelector(".toolbar").style.pointerEvents = "none";
-    document.querySelector(".acciones").style.opacity    = "0.4";
-    document.querySelector(".acciones").style.pointerEvents = "none";
+    document.getElementById("editor").contentEditable        = "false";
+    document.getElementById("tituloClipboard").disabled      = true;
+    document.querySelector(".toolbar").style.opacity         = "0.4";
+    document.querySelector(".toolbar").style.pointerEvents   = "none";
+    document.querySelector(".acciones").style.opacity        = "0.4";
+    document.querySelector(".acciones").style.pointerEvents  = "none";
+    document.getElementById("btnCopiarUrl").disabled         = false; // ver y copiar URL sí puede
+    document.getElementById("btnCompartir").disabled         = false;
     mostrarToast("Modo lectura — necesitas contraseña para editar", "amarillo");
 }
 
