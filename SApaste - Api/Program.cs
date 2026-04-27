@@ -49,18 +49,18 @@ app.MapPost("/api/pastes", async (NewPaste newpaste, HttpContext http) =>
         await connection.OpenAsync(); // abrir conexión
 
         using (var query = new SqlCommand(
-            "INSERT INTO Pastes (Id, Contenido, Titulo, Visibilidad, Password) VALUES (@Id, @Contenido, @Titulo, @Visibilidad, @Password)", connection))
+            "INSERT INTO Pastes (Id, Contenido, Titulo, Visibilidad, PassHash) VALUES (@Id, @Contenido, @Titulo, @Visibilidad, @PassHash)", connection))
         {
             query.Parameters.AddWithValue("@Id",          id);
             query.Parameters.AddWithValue("@Contenido",   newpaste.content);
             query.Parameters.AddWithValue("@Titulo",      newpaste.title ?? "Sin título");
             query.Parameters.AddWithValue("@Visibilidad", newpaste.visibilidad ?? "publico");
-            query.Parameters.AddWithValue("@Password", (object?)hashedPassword ?? DBNull.Value);
+            query.Parameters.AddWithValue("@PassHash", (object?)hashedPassword ?? DBNull.Value);
             await query.ExecuteNonQueryAsync();
         }
     }
 
-    return Results.Ok(new { id, url = $"http://192.168.3.170/p/{id}" });
+    return Results.Ok(new { id, url = $"https://sapaste.duckdns.org/p/{id}"});
 });
 
 // PUT — Actualizar paste existente
@@ -77,7 +77,7 @@ app.MapPut("/api/pastes/{id}", async (string id, NewPaste newpaste, HttpContext 
         string? visibilidad = null;
 
         using (var check = new SqlCommand(
-            "SELECT Password, Visibilidad FROM Pastes WHERE Id = @Id", connection))
+            "SELECT PassHash, Visibilidad FROM Pastes WHERE Id = @Id", connection))
         {
             check.Parameters.AddWithValue("@Id", id);
             using (var reader = await check.ExecuteReaderAsync())
@@ -85,9 +85,7 @@ app.MapPut("/api/pastes/{id}", async (string id, NewPaste newpaste, HttpContext 
                 if (!await reader.ReadAsync())
                     return Results.NotFound("Paste no encontrado");
 
-                storedHash  = reader.IsDBNull(reader.GetOrdinal("Password")) 
-                    ? null 
-                    : reader.GetString(reader.GetOrdinal("Password"));
+                storedHash = reader.IsDBNull(reader.GetOrdinal("PassHash")) ? null : reader.GetString(reader.GetOrdinal("PassHash"));
                 visibilidad = reader.GetString(reader.GetOrdinal("Visibilidad"));
             }
         }
@@ -116,7 +114,7 @@ app.MapPut("/api/pastes/{id}", async (string id, NewPaste newpaste, HttpContext 
             if (filasAfectadas == 0)
                 return Results.NotFound("Paste no encontrado");
 
-            return Results.Ok(new { id, url = $"http://192.168.3.170/p/{id}" });
+            return Results.Ok(new { id, url = $"https://sapaste.duckdns.org/p/{id}" });
         }
     }
 });
@@ -142,9 +140,7 @@ app.MapGet("api/pastes/{id}", async (string id, HttpContext http) =>
                 string  contenido   = reader.GetString(reader.GetOrdinal("Contenido"));
                 string  titulo      = reader.GetString(reader.GetOrdinal("Titulo"));
                 string  visibilidad = reader.GetString(reader.GetOrdinal("Visibilidad"));
-                string? storedHash  = reader.IsDBNull(reader.GetOrdinal("Password")) 
-                    ? null 
-                    : reader.GetString(reader.GetOrdinal("Password"));
+                string? storedHash = reader.IsDBNull(reader.GetOrdinal("PassHash")) ? null : reader.GetString(reader.GetOrdinal("PassHash"));
                 bool tienePassword  = storedHash != null;
 
                 // Paste estricto — contraseña obligatoria
@@ -178,7 +174,7 @@ app.MapDelete("/api/pastes/{id}", async (string id, HttpContext http) =>
         string? visibilidad = null;
 
         using (var check = new SqlCommand(
-            "SELECT Password, Visibilidad FROM Pastes WHERE Id = @Id", connection))
+            "SELECT PassHash, Visibilidad FROM Pastes WHERE Id = @Id", connection))
         {
             check.Parameters.AddWithValue("@Id", id);
             using (var reader = await check.ExecuteReaderAsync())
@@ -186,7 +182,7 @@ app.MapDelete("/api/pastes/{id}", async (string id, HttpContext http) =>
                 if (!await reader.ReadAsync())
                     return Results.NotFound("Paste no encontrado");
 
-                storedHash  = reader.IsDBNull(reader.GetOrdinal("Password")) ? null : reader.GetString(reader.GetOrdinal("Password"));
+                storedHash = reader.IsDBNull(reader.GetOrdinal("PassHash")) ? null : reader.GetString(reader.GetOrdinal("PassHash"));
                 visibilidad = reader.GetString(reader.GetOrdinal("Visibilidad"));
             }
         }
