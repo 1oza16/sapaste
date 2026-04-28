@@ -64,7 +64,7 @@ function copiarUrl() {
         btn.innerText = "✓ Copiado";
         btn.classList.add("copiado");
         setTimeout(() => {
-            btn.innerText = "📋 Copiar";
+            btn.innerText = "Copiar";
             btn.classList.remove("copiado");
         }, 2000);
     });
@@ -424,13 +424,6 @@ async function cargarDesdeUrl() {
 
     currentPasteId = id;
 
-    // Recuperar contraseña si venimos de un reload tras login
-    const savedPass = sessionStorage.getItem(`password_${id}`);
-    if (savedPass) {
-        passwordActual = savedPass;
-        sessionStorage.removeItem(`password_${id}`); // limpiar tras recuperar
-    }
-
     mostrarSpinner();
 
     try {
@@ -528,7 +521,11 @@ function mostrarPantallaLogin(id, conOpcionInvitado = false) {
 
 function entrarComoInvitado() {
     soloLectura = true;
-    // Cargar el contenido desde la API (sin contraseña, es invitado así que el GET lo permite)
+
+    // Eliminar el overlay del login
+    const overlay = document.getElementById("modal-login");
+    if (overlay) overlay.remove();
+
     mostrarSpinner();
     fetch(`${API_URL}/${currentPasteId}`)
         .then(res => res.json())
@@ -540,13 +537,13 @@ function entrarComoInvitado() {
         .finally(() => ocultarSpinner());
 }
 
+
 async function intentarAcceso(id) {
     const pass = document.getElementById("login-password").value.trim();
     if (!pass) {
         mostrarToast("Introduce la contraseña", "amarillo");
         return;
     }
-
     mostrarSpinner();
     try {
         const res = await fetch(`${API_URL}/${id}`, {
@@ -557,9 +554,15 @@ async function intentarAcceso(id) {
             return;
         }
 
-        // Guardar en sessionStorage antes del reload — sobrevive la recarga
-        sessionStorage.setItem(`password_${id}`, pass);
-        location.reload();
+        // Contraseña correcta — cargar directo sin reload
+        const data = await res.json();
+        passwordActual = pass;
+        modoVisibilidad = data.visibilidad;
+
+        const overlay = document.getElementById("modal-login");
+        if (overlay) overlay.remove();
+
+        cargarDatosEnEditor(data);
 
     } catch (err) {
         mostrarToast("No se pudo conectar con la API", "rojo");
@@ -567,7 +570,6 @@ async function intentarAcceso(id) {
         ocultarSpinner();
     }
 }
-
 
 function bloquearEditor() {
     document.getElementById("editor").contentEditable        = "false";
