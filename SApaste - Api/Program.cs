@@ -1,4 +1,8 @@
 using Microsoft.Data.SqlClient;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using BCrypt.Net;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -61,6 +65,41 @@ app.MapPost("/api/pastes", async (NewPaste newpaste, HttpContext http) =>
     }
 
     return Results.Ok(new { id, url = $"https://sapaste.duckdns.org/p/{id}"});
+});
+
+// POST — Verificar contraseña (Login Invitados)
+app.MapPost("/api/pastes/{id}/verify", async (string id, HttpContext http) =>
+{
+    string? password = http.Request.Headers["X-Paste-Password"].FirstOrDefault();
+
+    if (string.IsNullOrEmpty(password))
+        return Results.BadRequest("Contraseña requerida");
+
+    using (var connection = new SqlConnection(connectionBBDD))
+    {
+        await connection.OpenAsync();
+
+        using (var cmd = new SqlCommand(
+            "SELECT PassHash FROM Pastes WHERE Id = @Id", connection))
+        {
+            cmd.Parameters.AddWithValue("@Id", id);
+            using (var reader = await cmd.ExecuteReaderAsync())
+            {
+                if (!await reader.ReadAsync())
+                    return Results.NotFound("Paste no encontrado");
+
+                string? storedHash = reader.IsDBNull(reader.GetOrdinal("PassHash"))
+                    ? null
+                    : reader.GetString(reader.GetOrdinal("PassHash"));
+
+                if (storedHash == null)
+                    return Results.BadRequest("Este paste no tiene contraseña");
+
+                bool ok = BCrypt.Net.BCrypt.Verify(password, storedHash);
+                return ok ? Results.Ok() : Results.Unauthorized();
+            }
+        }
+    }
 });
 
 // PUT — Actualizar paste existente
@@ -208,6 +247,20 @@ app.MapDelete("/api/pastes/{id}", async (string id, HttpContext http) =>
             return Results.Ok("Paste eliminado");
         }
     }
+});
+
+// TEMPORAL — solo para crear el primer usuario, eliminar después
+app.MapPost("/api/setup", async (string username, string password) =>
+{
+    string hash = BCrypt.Net.BCrypt.HashPassword(password);
+    using var connection = new SqlConnection(connectionBBDD);
+    await connection.OpenAsync();
+    using var cmd = new SqlCommand(
+        "INSERT INTO Usuarios_Admin (Username, PassHash) VALUES (@U, @H)", connection);
+    cmd.Parameters.AddWithValue("@U", username);
+    cmd.Parameters.AddWithValue("@H", hash);
+    await cmd.ExecuteNonQueryAsync();
+    return Results.Ok("Usuario creado");
 });
 
 #endregion

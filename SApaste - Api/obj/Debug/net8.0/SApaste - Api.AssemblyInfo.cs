@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SApaste - Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+43c861c1189ccdd54cf9d4dad0175005a8d3f0a1")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d33f8457dfd753d59fe9e2992924de60cc1657ac")]
 [assembly: System.Reflection.AssemblyProductAttribute("SApaste - Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SApaste - Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
