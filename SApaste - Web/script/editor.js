@@ -276,14 +276,20 @@ async function ejecutarGuardado(visibilidad, password) {
         if (currentPasteId) {
             res = await fetch(`${API_URL}/${currentPasteId}`, {
                 method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ content: contenido, title: titulo, password, visibilidad })
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(password && { "X-Paste-Password": password })
+                },
+                body: JSON.stringify({ content: contenido, title: titulo, visibilidad })
             });
         } else {
             res = await fetch(API_URL, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ content: contenido, title: titulo, password, visibilidad })
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(password && { "X-Paste-Password": password })
+                },
+                body: JSON.stringify({ content: contenido, title: titulo, visibilidad })
             });
         }
 
@@ -430,6 +436,11 @@ async function cargarDesdeUrl() {
         const res = await fetch(`${API_URL}/${id}`);
 
         if (!res.ok) {
+            if (res.status === 401) {
+                // Es estricto — mostrar login sin saber aún la visibilidad
+                mostrarPantallaLogin(id, false);
+                return;
+            }
             document.getElementById("urlClipboard").innerText = "URL: Paste no encontrado o expirado";
             mostrarToast("Paste no encontrado o expirado", "rojo");
             return;
@@ -437,12 +448,6 @@ async function cargarDesdeUrl() {
 
         const data = await res.json();
         modoVisibilidad = data.visibilidad;
-
-        // Privado estricto sin contraseña → mostrar pantalla de login
-        if (data.visibilidad === "estricto") {
-            mostrarPantallaLogin(id, false); // sin opción invitado
-            return;
-        }
 
         // Privado con invitados → cargar contenido pero bloquear edición
         if (data.visibilidad === "invitados") {
@@ -467,7 +472,7 @@ function mostrarPantallaLogin(id, conOpcionInvitado = false) {
         <button
             onclick="entrarComoInvitado()"
             style="padding:10px 28px; background:var(--cuadro-bg); color:var(--texto-color); border:1px solid var(--border-color); border-radius:8px; font-size:15px; font-weight:700; cursor:pointer;">
-            👁 Entrar como invitado
+            Entrar como invitado
         </button>
     ` : "";
 
@@ -486,7 +491,10 @@ function mostrarPantallaLogin(id, conOpcionInvitado = false) {
 
     overlay.innerHTML = `
         <div class="modal-box" style="max-width: 600px; width: 90%;">
-            <div style="font-size: 36px; margin-bottom: 12px;">🔒︎</div>
+            <div style="font-size: 36px; margin-bottom: 12px;">
+                <img src="img/icons/theme_white/candado_login.png" alt="candado_login" class="icono-claro" width="30px">
+                <img src="img/icons/theme_black/candado_login.png" alt="candado_login" class="icono-oscuro" width="30px">
+            </div>
             <h3 style="margin: 0 0 8px;">Paste protegido</h3>
             <p style="color:#888; font-size:14px; margin: 0 0 20px;">
                 ${conOpcionInvitado
