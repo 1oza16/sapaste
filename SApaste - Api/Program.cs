@@ -342,7 +342,7 @@ app.MapGet("/api/admin/pastes", async (HttpContext http) =>
     await connection.OpenAsync();
 
     using var cmd = new SqlCommand(
-        "SELECT Id, Titulo, Visibilidad, FechaCreacion FROM Pastes ORDER BY FechaCreacion DESC", connection);
+        "SELECT Id, Contenido, Titulo, Visibilidad, FechaCreacion FROM Pastes ORDER BY FechaCreacion DESC", connection);
 
     var pastes = new List<object>();
     int pub = 0, inv = 0, strict = 0;
@@ -358,6 +358,7 @@ app.MapGet("/api/admin/pastes", async (HttpContext http) =>
         pastes.Add(new
         {
             id          = reader.GetString(reader.GetOrdinal("Id")),
+            contenido   = reader.GetString(reader.GetOrdinal("Contenido")),
             titulo      = reader.GetString(reader.GetOrdinal("Titulo")),
             visibilidad = vis,
             creado      = reader.GetDateTime(reader.GetOrdinal("FechaCreacion"))
