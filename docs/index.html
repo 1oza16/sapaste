@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SApaste, el mejor clipboard online">
+    <link rel="stylesheet" href="styles/style.css">
+    <link rel="icon" href="img/sapaste-icon.png" type="image/png">
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
+    <title>SApaste</title>
+</head>
+<body>
+    <header>
+        <h3 class="Logo">
+            <img src="img/sapaste-logo-dark.png" alt="SApaste" class="logo-claro" width="350">
+            <img src="img/sapaste-logo-white.png" alt="SApaste" class="logo-oscuro" width="350">
+        </h3>
+    </header>
+    <main>
+        <div class="CuadroTexto" data-guia="paste-view">
+            <div class="estado-bar">
+                <div class="estado-badge sin-guardar" id="estadoBadge">
+                    <span id="estadoPunto">●</span>
+                    <span id="estadoTexto">Sin guardar</span>
+                </div>
+                <span class="reloj" id="reloj">00:00:00</span>
+            </div>
+
+            <input
+                type="text"
+                id="tituloClipboard"
+                placeholder="Título del clipboard..."
+                aria-label="Título del clipboard"
+                data-guia="titulo"
+                style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 8px; border: 1px solid var(--border-color); background-color: var(--cuadro-bg); color: var(--texto-color); font-size: 16px;"
+            >
+
+            <div class="url-acciones">
+                <div id="urlClipboard" data-guia="url">URL: (aún no generada)</div>
+                <button class="btn-url" id="btnCopiarUrl" onclick="copiarUrl()" disabled>Copiar</button>
+                <div class="compartir-menu">
+                    <button class="btn-url" id="btnCompartir" onclick="toggleCompartir()" disabled>Compartir</button>
+                    <div class="compartir-dropdown" id="compartirDropdown">
+                        <a class="compartir-opcion" id="shareWhatsapp" href="#" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+                        <a class="compartir-opcion" id="shareGmail" href="#" target="_blank" rel="noopener noreferrer">Gmail</a>
+                        <a class="compartir-opcion" id="shareTelegram" href="#" target="_blank" rel="noopener noreferrer">Telegram</a>
+                        <div class="compartir-opcion" onclick="shareNativo()">Más opciones...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="toolbar">
+                <div class="toolbar-izq">
+                    <button onclick="negrita()"><b>B</b></button>
+                    <button onclick="cursiva()"><i>I</i></button>
+                    <button onclick="subrayado()"><u>U</u></button>
+
+                    <span class="separator"></span>
+
+                    <button onclick="cmd('justifyLeft')">⯇</button>
+                    <button onclick="cmd('justifyCenter')">≡</button>
+                    <button onclick="cmd('justifyRight')">⯈</button>
+
+                    <span class="separator"></span>
+
+                    <button onclick="cmd('insertUnorderedList')">• Lista</button>
+                    <button onclick="cmd('insertOrderedList')">1. Lista</button>
+
+                    <span class="separator"></span>
+
+                    <button onclick="toggleDarkMode()" id="btnDarkMode">Modo Oscuro</button>
+                </div>
+
+                <div class="toolbar-der">
+                    <button onclick="guardarContenido()" id="btnGuardar" data-guia="guardar">Guardar</button>
+                    <button onclick="cargarContenido()">Recargar</button>
+                    <button onclick="eliminarPaste()">Eliminar</button>
+                    <a class="btn-dashboard" href="dashboard.html">Dashboard →</a>
+                </div>
+            </div>
+
+            <div id="editor" contenteditable="true" data-guia="contenido" role="textbox" aria-label="Contenido del clipboard" aria-multiline="true"></div>
+            <div id="contador">Caracteres: 0</div>
+        </div>
+    </main>
+
+    <div id="historial-panel">
+        <div id="historial-tab">
+            <span class="historial-tab-texto">Ver Historial</span>
+            <img src="img/icons/light/history.png" alt="History" class="icono-claro" width="20" style="margin-top: 5px;">
+            <img src="img/icons/dark/history.png" alt="History" class="icono-oscuro" width="20" style="margin-top: 5px;">
+        </div>
+        <div id="historial-contenido">
+            <div id="historial-cabecera">
+                <span>Historial</span>
+                <button id="historial-borrar" onclick="limpiarHistorial()">Limpiar</button>
+            </div>
+            <div id="historial-lista">
+                <div class="historial-vacio" id="historial-vacio">Sin actividad aún</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="spinner-overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <div id="modal-confirmacion">
+        <div class="modal-box">
+            <h3 id="modalTitulo">¿Estás seguro?</h3>
+            <p id="modalMensaje">Esta acción no se puede deshacer</p>
+            <div class="modal-botones">
+                <button class="btn-cancelar" onclick="cerrarModal()">Cancelar</button>
+                <button class="btn-confirmar" id="btnConfirmar">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-visibilidad">
+        <div class="modal-box">
+            <h3>¿Cómo quieres guardar este paste?</h3>
+
+            <div class="vis-opciones" data-guia="visibilidad">
+                <label class="vis-opcion" id="vis-publico">
+                    <input type="radio" name="visibilidad" value="publico" checked>
+                    <span class="vis-icono">
+                        <img src="img/icons/light/paste-public.png" alt="Public paste" class="icono-claro" width="23">
+                        <img src="img/icons/dark/paste-public.png" alt="Public paste" class="icono-oscuro" width="23">
+                    </span>
+                    <span class="vis-label">Público</span>
+                    <span class="vis-desc">Cualquiera puede ver y editar</span>
+                </label>
+                <label class="vis-opcion" id="vis-invitados">
+                    <input type="radio" name="visibilidad" value="invitados">
+                    <span class="vis-icono">
+                        <img src="img/icons/light/paste-guests.png" alt="Paste with guests" class="icono-claro" width="23">
+                        <img src="img/icons/dark/paste-guests.png" alt="Paste with guests" class="icono-oscuro" width="23">
+                    </span>
+                    <span class="vis-label">Privado con invitados</span>
+                    <span class="vis-desc">Todos pueden ver, solo tú editas</span>
+                </label>
+                <label class="vis-opcion" id="vis-estricto">
+                    <input type="radio" name="visibilidad" value="estricto">
+                    <span class="vis-icono">
+                        <img src="img/icons/light/paste-private.png" alt="Private paste" class="icono-claro" width="23">
+                        <img src="img/icons/dark/paste-private.png" alt="Private paste" class="icono-oscuro" width="23">
+                    </span>
+                    <span class="vis-label">Privado estricto</span>
+                    <span class="vis-desc">Solo se accede con contraseña</span>
+                </label>
+            </div>
+
+            <div id="vis-password-campo" style="display:none; margin-top: 14px;">
+                <input
+                    type="password"
+                    id="vis-password-input"
+                    placeholder="Contraseña del paste..."
+                    style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border-color); background:var(--cuadro-bg); color:var(--texto-color); font-size:14px;"
+                >
+            </div>
+
+            <div class="modal-botones" style="margin-top: 20px;">
+                <button class="btn-cancelar" onclick="cerrarModalVisibilidad()">Cancelar</button>
+                <button class="btn-confirmar" style="background:#4a90d9 !important; border-color:#28a745 !important;" onclick="confirmarGuardado()">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-acceso">
+        <div class="modal-box">
+            <h3>Paste privado</h3>
+            <p id="access-modal-text">Introduce la contraseña para acceder al contenido.</p>
+            <input
+                type="password"
+                id="access-password-input"
+                class="access-password-input"
+                placeholder="Contraseña del paste..."
+                aria-label="Contraseña del paste"
+                data-guia="access-password"
+            >
+            <div class="modal-botones">
+                <button class="btn-cancelar" type="button" onclick="cancelarAcceso()">Cancelar</button>
+                <button id="access-guest-button" type="button" hidden>Entrar como invitado</button>
+                <button class="btn-acceder" type="button" onclick="verificarAcceso()">Acceder</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="guia-overlay" id="guiaOverlay" aria-hidden="true"></div>
+    <aside class="guia-popover" id="guiaPopover" aria-labelledby="guiaTitulo" aria-describedby="guiaTexto" hidden>
+        <div class="guia-apartados" aria-label="Apartados de la introducción">
+            <div class="guia-apartado" id="guiaApartadoCreacion">
+                <span class="guia-apartado-numero">1</span>
+                <span>Creación de paste</span>
+            </div>
+            <div class="guia-apartado" id="guiaApartadoAcceso">
+                <span class="guia-apartado-numero">2</span>
+                <span>Acceso a paste</span>
+            </div>
+            <div class="guia-apartado" id="guiaApartadoDashboard" hidden>
+                <span class="guia-apartado-numero">3</span>
+                <span>Dashboard</span>
+            </div>
+        </div>
+        <span class="guia-progreso" id="guiaProgreso"></span>
+        <button class="guia-cerrar" id="guiaCerrar" type="button" aria-label="Cerrar guía">×</button>
+        <h2 id="guiaTitulo"></h2>
+        <p id="guiaTexto"></p>
+        <div class="guia-acciones">
+            <button class="guia-siguiente" id="guiaSiguiente" type="button">Siguiente</button>
+            <button class="guia-continuar" id="guiaContinuar" type="button" hidden>Continuar introducción</button>
+            <button class="guia-finalizar" id="guiaFinalizar" type="button" hidden>Finalizar</button>
+        </div>
+    </aside>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

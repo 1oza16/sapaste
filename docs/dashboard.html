@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SApaste — Admin</title>
+    <link rel="stylesheet" href="styles/dashboard.css">
+    <link rel="icon" href="img/sapaste-icon.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Panel principal -->
+    <div id="panel" class="panel">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <img src="img/sapaste-logo-dark.png" alt="SApaste" class="logo-claro" width="180px">
+                <img src="img/sapaste-logo-white.png" alt="SApaste" class="logo-oscuro" width="180px">
+            </div>
+            <nav class="sidebar-nav">
+                <a class="nav-item active" data-section="pastes">
+                    <span class="nav-icon">◈</span>
+                    <span>Pastes</span>
+                </a>
+                <a class="nav-item" data-section="stats">
+                    <span class="nav-icon">◉</span>
+                    <span>Estadísticas</span>
+                </a>
+                <a class="nav-item" data-section="config">
+                    <span class="nav-icon">◎</span>
+                    <span>Configuración</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="sidebar-user">
+                    <div class="user-avatar">SA</div>
+                    <div class="user-info">
+                        <span class="user-name">admin</span>
+                        <span class="user-role">superuser</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Contenido principal -->
+        <main class="main">
+
+            <!-- Sección pastes -->
+            <section id="section-pastes" class="section active">
+
+                <div class="section-header">
+                    <div>
+                        <h1 class="section-title">Pastes</h1>
+                        <p class="section-sub">Gestión completa de todos los clipboards</p>
+                        <span class="reloj" id="reloj">00:00:00</span>
+                    </div>
+                    <div class="section-actions">
+                        <a class="btn-secondary" href="index.html">← Volver al editor</a>
+                        <button class="btn-primary" onclick="recargarTabla()">↺ Recargar</button>
+                    </div>
+                </div>
+
+                <!-- Métricas -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-card-text">
+                            <span class="stat-label">Total</span>
+                            <span class="stat-value" id="stat-total">—</span>
+                        </div>
+                        <div class="stat-icon">
+                            <img src="img/icons/light/total-pastes.png" alt="Total pastes" class="logo-claro" style="width: 32px; margin: auto;">
+                            <img src="img/icons/dark/total-pastes.png" alt="Total pastes" class="logo-oscuro" style="width: 32px; margin: auto;">
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-text">
+                            <span class="stat-label">Públicos</span>
+                            <span class="stat-value success" id="stat-pub">0</span>
+                        </div>
+                        <div class="stat-icon">
+                            <img src="img/icons/shared/paste-public.png" alt="Public pastes" class="iconos-pastes">
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-text">
+                            <span class="stat-label">Con invitados</span>
+                            <span class="stat-value warning" id="stat-inv">—</span>
+                        </div>
+                        <div class="stat-icon">
+                            <img src="img/icons/shared/paste-guests.png" alt="Pastes with guests" class="iconos-pastes">
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-text">
+                            <span class="stat-label">Estrictos</span>
+                            <span class="stat-value danger" id="stat-strict">—</span>
+                        </div>
+                        <div class="stat-icon">
+                            <img src="img/icons/shared/paste-strict.png" alt="Strict pastes" class="iconos-pastes">
+                        </div>
+                        
+                    </div>
+                </div>
+
+                <!-- Toolbar -->
+                <div class="table-toolbar">
+                    <input 
+                        type="text" 
+                        class="search-input" 
+                        id="search-input"
+                        placeholder="Buscar por título o ID..."
+                        oninput="filtrarTabla()"
+                    >
+                    <div class="filter-group">
+                        <button class="filter-btn active" data-filter="todos" onclick="setFiltro(this)">Todos</button>
+                        <button class="filter-btn" data-filter="publico" onclick="setFiltro(this)">Público</button>
+                        <button class="filter-btn" data-filter="invitados" onclick="setFiltro(this)">Invitados</button>
+                        <button class="filter-btn" data-filter="estricto" onclick="setFiltro(this)">Estricto</button>
+                    </div>
+                </div>
+
+                <!-- Tabla -->
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Título</th>
+                                <th>Preview</th>
+                                <th>Visibilidad</th>
+                                <th>Creado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-body">
+                            <!-- filas inyectadas por JS -->
+                        </tbody>
+                    </table>
+
+                    <!-- Estado vacío -->
+                    <div class="table-empty hidden" id="tabla-empty">
+                        <span class="empty-icon">◌</span>
+                        <span>No se encontraron pastes</span>
+                    </div>
+
+                    <!-- Estado carga -->
+                    <div class="table" id="tabla-loading">
+                        <div class="loading-bar"></div>
+                    </div>
+                </div>
+
+                <!-- Paginación -->
+                <div class="pagination" id="paginacion">
+                    <span class="pagination-info" id="pag-info">— resultados</span>
+                    <div class="pagination-btns" id="pag-btns"></div>
+                </div>
+
+            </section>
+
+            <!-- Sección stats (placeholder) -->
+            <section id="section-stats" class="section">
+                <div class="section-header">
+                    <div>
+                        <h1 class="section-title">Estadísticas</h1>
+                        <p class="section-sub">Resumen del estado actual del sistema</p>
+                    </div>
+                    <button class="btn-primary" onclick="actualizarStats()">↺ Actualizar</button>
+                </div>
+            
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-card-text">
+                            <span class="stat-label">Total</span>
+                            <span class="stat-value" id="stat-total">—</span>
+                        </div>
+                        <div class="stat-icon">
+                            <img src="img/icons/light/total-pastes.png" alt="Total pastes" class="logo-claro" style="width: 32px; margin: auto;">
+                            <img src="img/icons/dark/total-pastes.png" alt="Total pastes" class="logo-oscuro" style="width: 32px; margin: auto;">
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-text">
+                            <span class="stat-label">Públicos</span>
+                            <span class="stat-value success" id="stat-pub">0</span>
+                        </div>
+                        <div class="stat-icon">
+                            <img src="img/icons/shared/paste-public.png" alt="Public pastes" class="iconos-pastes">
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-text">
+                            <span class="stat-label">Con invitados</span>
+                            <span class="stat-value warning" id="stat-inv">—</span>
+                        </div>
+                        <div class="stat-icon">
+                            <img src="img/icons/shared/paste-guests.png" alt="Pastes with guests" class="iconos-pastes">
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-text">
+                            <span class="stat-label">Estrictos</span>
+                            <span class="stat-value danger" id="stat-strict">—</span>
+                        </div>
+                        <div class="stat-icon">
+                            <img src="img/icons/shared/paste-strict.png" alt="Strict pastes" class="iconos-pastes">
+                        </div>
+                        
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sección config (placeholder) -->
+            <section id="section-config" class="section">
+                <div class="section-header">
+                    <div>
+                        <h1 class="section-title">Configuración</h1>
+                        <p class="section-sub">Ajustes del panel de administración</p>
+                    </div>
+                </div>
+            
+                <div class="config-card">
+                    <div class="config-row">
+                        <div class="config-info">
+                            <span class="config-label">Tema</span>
+                            <span class="config-desc">Cambia entre modo claro y oscuro</span>
+                        </div>
+                        <div class="theme-toggle" id="theme-toggle" onclick="toggleTema()">
+                            <span class="theme-option" id="theme-claro">☀ Claro</span>
+                            <span class="theme-option" id="theme-oscuro">☾ Oscuro</span>
+                            <div class="theme-slider" id="theme-slider"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Modal ver/editar paste -->
+    <div id="modal-paste" class="modal-overlay hidden">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div>
+                    <h3 class="modal-title" id="modal-paste-titulo">Título del paste</h3>
+                    <span class="mono modal-id" id="modal-paste-id">id</span>
+                </div>
+                <button class="modal-close" onclick="cerrarModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-meta">
+                    <span id="modal-paste-badge"></span>
+                    <span class="modal-fecha mono" id="modal-paste-fecha"></span>
+                </div>
+                <div class="modal-content-preview" id="modal-paste-contenido"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="cerrarModal()">Cerrar</button>
+                <button class="btn-danger" id="modal-btn-eliminar">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal confirmar eliminar -->
+    <div id="modal-confirmar" class="modal-overlay hidden">
+        <div class="modal-box modal-box-sm">
+            <div class="modal-header">
+                <h3 class="modal-title">¿Eliminar paste?</h3>
+                <button class="modal-close" onclick="cerrarConfirmar()">✕</button>
+            </div>
+            <p class="modal-warning-text">Esta acción no se puede deshacer. El paste y su contenido se perderán permanentemente.</p>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="cerrarConfirmar()">Cancelar</button>
+                <button class="btn-danger" id="confirmar-btn">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast container -->
+    <div id="toast-container"></div>
+
+    <div class="dashboard-guide-overlay" id="dashboard-guide-overlay" aria-hidden="true"></div>
+    <aside class="dashboard-guide" id="dashboard-guide" aria-labelledby="dashboard-guide-title" aria-describedby="dashboard-guide-text" hidden>
+        <div class="dashboard-guide-chapters" aria-label="Apartados de la introducción">
+            <div class="dashboard-guide-chapter">
+                <span>2</span>
+                <span>Acceso a paste</span>
+            </div>
+            <div class="dashboard-guide-chapter active">
+                <span>3</span>
+                <span>Dashboard</span>
+            </div>
+        </div>
+        <span class="dashboard-guide-progress">Comprobación del paste</span>
+        <button class="dashboard-guide-close" id="dashboard-guide-close" type="button" aria-label="Finalizar introducción">×</button>
+        <h2 id="dashboard-guide-title">Tu paste en el dashboard</h2>
+        <p id="dashboard-guide-text">Desde aquí puedes revisar el paste, consultar sus detalles o eliminarlo.</p>
+        <button class="btn-primary" id="dashboard-guide-finish" type="button">Finalizar introducción</button>
+    </aside>
+
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
