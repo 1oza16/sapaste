@@ -26,12 +26,13 @@ Interfaz web de usuario de SApaste. Desarrollada con **HTML, CSS y JavaScript va
 ├── script/
 │   └── editor.js
 └── img/
-    ├── SApaste2.png          ← Logo tema oscuro
-    ├── SApaste3.png          ← Logo tema claro
-    ├── SApasteIcon.png       ← Favicon
+    ├── sapaste-logo-white.png ← Logo blanco
+    ├── sapaste-logo-dark.png  ← Logo oscuro
+    ├── sapaste-icon.png       ← Favicon
     └── icons/
-        ├── theme_white/      ← Iconos para tema oscuro
-        └── theme_black/      ← Iconos para tema claro
+        ├── light/            ← Iconos para el tema claro
+        ├── dark/             ← Iconos para el tema oscuro
+        └── shared/           ← Iconos compartidos
 ```
 
 ---

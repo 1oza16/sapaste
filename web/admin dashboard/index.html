@@ -5,20 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SApaste — Admin</title>
     <link rel="stylesheet" href="styles/style.css">
-    <script src="script/admin.js"></script>
-    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon"> 
-    <link rel="shortcut icon" href="../img/SApasteIcon.png" type="image/x-icon">
+    <link rel="icon" href="../img/sapaste-icon.png" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <!-- LOGIN OVERLAY -->
+    <!-- Login overlay -->
     <div id="login-overlay" class="login-overlay">
         <div class="login-box">
             <div class="login-logo">
-                <img src="../img/SApaste3.png" alt="SApaste" class="logo-claro" width="300px">
-                <img src="../img/SApaste2.png" alt="SApaste" class="logo-oscuro" width="300px">
+                <img src="../img/sapaste-logo-dark.png" alt="SApaste" class="logo-claro" width="300px">
+                <img src="../img/sapaste-logo-white.png" alt="SApaste" class="logo-oscuro" width="300px">
             </div>
             <p class="login-sub">Acceso restringido al panel de administración</p>
             <div class="login-field">
@@ -34,14 +32,14 @@
         </div>
     </div>
 
-    <!-- PANEL PRINCIPAL -->
+    <!-- Panel principal -->
     <div id="panel" class="panel hidden">
 
-        <!-- SIDEBAR -->
+        <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-logo">
-                <img src="../img/SApaste3.png" alt="SApaste" class="logo-claro" width="180px">
-                <img src="../img/SApaste2.png" alt="SApaste" class="logo-oscuro" width="180px">
+                <img src="../img/sapaste-logo-dark.png" alt="SApaste" class="logo-claro" width="180px">
+                <img src="../img/sapaste-logo-white.png" alt="SApaste" class="logo-oscuro" width="180px">
             </div>
             <nav class="sidebar-nav">
                 <a class="nav-item active" data-section="pastes">
@@ -69,10 +67,10 @@
             </div>
         </aside>
 
-        <!-- CONTENIDO PRINCIPAL -->
+        <!-- Contenido principal -->
         <main class="main">
 
-            <!-- SECCIÓN PASTES -->
+            <!-- Sección pastes -->
             <section id="section-pastes" class="section active">
 
                 <div class="section-header">
@@ -84,7 +82,7 @@
                     <button class="btn-primary" onclick="recargarTabla()">↺ Recargar</button>
                 </div>
 
-                <!-- MÉTRICAS -->
+                <!-- Métricas -->
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-card-text">
@@ -92,8 +90,8 @@
                             <span class="stat-value" id="stat-total">—</span>
                         </div>
                         <div class="stat-icon">
-                            <img src="../img/icons/theme_white/total_pastes.png" alt="total_pastes_claro" class="logo-claro" style="width: 32px; margin: auto;">
-                            <img src="../img/icons/theme_black/total_pastes.png" alt="total_pastes_negro" class="logo-oscuro" style="width: 32px; margin: auto;">
+                            <img src="../img/icons/light/total-pastes.png" alt="Total pastes" class="logo-claro" style="width: 32px; margin: auto;">
+                            <img src="../img/icons/dark/total-pastes.png" alt="Total pastes" class="logo-oscuro" style="width: 32px; margin: auto;">
                         </div>
                     </div>
                     <div class="stat-card">
@@ -102,7 +100,7 @@
                             <span class="stat-value success" id="stat-pub">15</span>
                         </div>
                         <div class="stat-icon">
-                            <img src="../img/icons/common/paste_publico.png" alt="pastes_publicos" class="iconos-pastes">
+                            <img src="../img/icons/shared/paste-public.png" alt="Public pastes" class="iconos-pastes">
                         </div>
                     </div>
                     <div class="stat-card">
@@ -111,7 +109,7 @@
                             <span class="stat-value warning" id="stat-inv">—</span>
                         </div>
                         <div class="stat-icon">
-                            <img src="../img/icons/common/paste_invitados.png" alt="pastes_invitados" class="iconos-pastes">
+                            <img src="../img/icons/shared/paste-guests.png" alt="Pastes with guests" class="iconos-pastes">
                         </div>
                     </div>
                     <div class="stat-card">
@@ -120,13 +118,13 @@
                             <span class="stat-value danger" id="stat-strict">—</span>
                         </div>
                         <div class="stat-icon">
-                            <img src="../img/icons/common/paste_estricto.png" alt="pastes_estrictos" class="iconos-pastes">
+                            <img src="../img/icons/shared/paste-strict.png" alt="Strict pastes" class="iconos-pastes">
                         </div>
                         
                     </div>
                 </div>
 
-                <!-- TOOLBAR -->
+                <!-- Toolbar -->
                 <div class="table-toolbar">
                     <input 
                         type="text" 
@@ -143,7 +141,7 @@
                     </div>
                 </div>
 
-                <!-- TABLA -->
+                <!-- Tabla -->
                 <div class="table-wrapper">
                     <table class="data-table">
                         <thead>
@@ -161,19 +159,19 @@
                         </tbody>
                     </table>
 
-                    <!-- ESTADO VACÍO -->
+                    <!-- Estado vacío -->
                     <div class="table-empty hidden" id="tabla-empty">
                         <span class="empty-icon">◌</span>
                         <span>No se encontraron pastes</span>
                     </div>
 
-                    <!-- ESTADO CARGA -->
+                    <!-- Estado carga -->
                     <div class="table-loading" id="tabla-loading">
                         <div class="loading-bar"></div>
                     </div>
                 </div>
 
-                <!-- PAGINACIÓN -->
+                <!-- Paginación -->
                 <div class="pagination" id="paginacion">
                     <span class="pagination-info" id="pag-info">— resultados</span>
                     <div class="pagination-btns" id="pag-btns"></div>
@@ -181,7 +179,7 @@
 
             </section>
 
-            <!-- SECCIÓN STATS (placeholder) -->
+            <!-- Sección stats (placeholder) -->
             <section id="section-stats" class="section">
                 <div class="section-header">
                     <div>
@@ -198,8 +196,8 @@
                             <span class="stat-value" id="stat-total">—</span>
                         </div>
                         <div class="stat-icon">
-                            <img src="../img/icons/theme_white/total_pastes.png" alt="total_pastes_claro" class="logo-claro" style="width: 32px; margin: auto;">
-                            <img src="../img/icons/theme_black/total_pastes.png" alt="total_pastes_negro" class="logo-oscuro" style="width: 32px; margin: auto;">
+                            <img src="../img/icons/light/total-pastes.png" alt="Total pastes" class="logo-claro" style="width: 32px; margin: auto;">
+                            <img src="../img/icons/dark/total-pastes.png" alt="Total pastes" class="logo-oscuro" style="width: 32px; margin: auto;">
                         </div>
                     </div>
                     <div class="stat-card">
@@ -208,7 +206,7 @@
                             <span class="stat-value success" id="stat-pub">15</span>
                         </div>
                         <div class="stat-icon">
-                            <img src="../img/icons/common/paste_publico.png" alt="pastes_publicos" class="iconos-pastes">
+                            <img src="../img/icons/shared/paste-public.png" alt="Public pastes" class="iconos-pastes">
                         </div>
                     </div>
                     <div class="stat-card">
@@ -217,7 +215,7 @@
                             <span class="stat-value warning" id="stat-inv">—</span>
                         </div>
                         <div class="stat-icon">
-                            <img src="../img/icons/common/paste_invitados.png" alt="pastes_invitados" class="iconos-pastes">
+                            <img src="../img/icons/shared/paste-guests.png" alt="Pastes with guests" class="iconos-pastes">
                         </div>
                     </div>
                     <div class="stat-card">
@@ -226,14 +224,14 @@
                             <span class="stat-value danger" id="stat-strict">—</span>
                         </div>
                         <div class="stat-icon">
-                            <img src="../img/icons/common/paste_estricto.png" alt="pastes_estrictos" class="iconos-pastes">
+                            <img src="../img/icons/shared/paste-strict.png" alt="Strict pastes" class="iconos-pastes">
                         </div>
                         
                     </div>
                 </div>
             </section>
 
-            <!-- SECCIÓN CONFIG (placeholder) -->
+            <!-- Sección config (placeholder) -->
             <section id="section-config" class="section">
                 <div class="section-header">
                     <div>
@@ -260,7 +258,7 @@
         </main>
     </div>
 
-    <!-- MODAL VER/EDITAR PASTE -->
+    <!-- Modal ver/editar paste -->
     <div id="modal-paste" class="modal-overlay hidden">
         <div class="modal-box">
             <div class="modal-header">
@@ -284,7 +282,7 @@
         </div>
     </div>
 
-    <!-- MODAL CONFIRMAR ELIMINAR -->
+    <!-- Modal confirmar eliminar -->
     <div id="modal-confirmar" class="modal-overlay hidden">
         <div class="modal-box modal-box-sm">
             <div class="modal-header">
@@ -299,9 +297,9 @@
         </div>
     </div>
 
-    <!-- TOAST CONTAINER -->
+    <!-- Toast container -->
     <div id="toast-container"></div>
 
-    <script src="admin.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>
