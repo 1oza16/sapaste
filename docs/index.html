@@ -4,12 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="SApaste, el mejor clipboard online">
+    <link rel="stylesheet" href="styles/common.css">
     <link rel="stylesheet" href="styles/style.css">
     <link rel="icon" href="img/sapaste-icon.png" type="image/png">
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
     <title>SApaste</title>
 </head>
 <body>
+    <section class="pantalla-introduccion" id="pantallaIntroduccion" aria-labelledby="introduccionTitulo" hidden>
+        <div class="cuadro-introduccion">
+            <div class="intro-logo">
+                <img src="img/sapaste-logo-dark.png" alt="SApaste" class="logo-claro" width="350">
+                <img src="img/sapaste-logo-white.png" alt="SApaste" class="logo-oscuro" width="350">
+            </div>
+            <h1 id="introduccionTitulo">Bienvenido:</h1>
+            <p class="intro-texto">Esto es un pequeño proyecto que realicé en 1º de DAM de forma opcional. Consiste en un clipboard online el cual permite crear, guardar y compartir textos de forma sencilla.</p>
+            <p class="intro-texto">El servidor donde servíamos la API y teníamos la base de datos se cerró, para ello he creado esta simulación que da una visión del funcionamiento que tenía.</p>
+            <p class="intro-texto">Espero que os guste, elegir una de las dos opciones:</p>
+            <div class="intro-acciones">
+                <button class="intro-boton intro-boton-principal" id="btnEmpezarTutorial" type="button">Hacer simulación</button>
+                <button class="intro-boton" id="btnIrPorLibre" type="button">Ir por libre</button>
+            </div>
+            <a class="intro-autor" href="https://github.com/1oza16" aria-label="Made By 1oza16, visitar GitHub">
+                <img src="https://avatars.githubusercontent.com/u/202138418?v=4" alt="Foto de perfil de 1oza16" width="44" height="44">
+                <span>Made By <strong>1oza16</strong></span>
+            </a>
+        </div>
+    </section>
     <header>
         <h3 class="Logo">
             <img src="img/sapaste-logo-dark.png" alt="SApaste" class="logo-claro" width="350">
@@ -75,7 +96,6 @@
                     <button onclick="guardarContenido()" id="btnGuardar" data-guia="guardar">Guardar</button>
                     <button onclick="cargarContenido()">Recargar</button>
                     <button onclick="eliminarPaste()">Eliminar</button>
-                    <a class="btn-dashboard" href="dashboard.html">Dashboard →</a>
                 </div>
             </div>
 
@@ -84,13 +104,18 @@
         </div>
     </main>
 
+    <section class="funcionalidades" aria-label="Funcionalidades">
+        <button class="btn-dashboard" id="btnHacerSimulacion" type="button">Hacer simulación</button>
+        <a class="btn-dashboard" href="dashboard.html">Ir al Dashboard</a>
+    </section>
+
     <div id="historial-panel">
         <div id="historial-tab">
             <span class="historial-tab-texto">Ver Historial</span>
             <img src="img/icons/light/history.png" alt="History" class="icono-claro" width="20" style="margin-top: 5px;">
             <img src="img/icons/dark/history.png" alt="History" class="icono-oscuro" width="20" style="margin-top: 5px;">
         </div>
-        <div id="historial-contenido">
+        <div id="historial-contenido">  
             <div id="historial-cabecera">
                 <span>Historial</span>
                 <button id="historial-borrar" onclick="limpiarHistorial()">Limpiar</button>
@@ -186,24 +211,24 @@
         </div>
     </div>
 
-    <div class="guia-overlay" id="guiaOverlay" aria-hidden="true"></div>
-    <aside class="guia-popover" id="guiaPopover" aria-labelledby="guiaTitulo" aria-describedby="guiaTexto" hidden>
-        <div class="guia-apartados" aria-label="Apartados de la introducción">
-            <div class="guia-apartado" id="guiaApartadoCreacion">
-                <span class="guia-apartado-numero">1</span>
+    <div class="guide-overlay" id="guiaOverlay" aria-hidden="true"></div>
+    <aside class="guide-dialog" id="guiaPopover" aria-labelledby="guiaTitulo" aria-describedby="guiaTexto" hidden>
+        <div class="guide-chapters" aria-label="Apartados de la introducción">
+            <div class="guide-chapter" id="guiaApartadoCreacion">
+                <span class="guide-chapter-number">1</span>
                 <span>Creación de paste</span>
             </div>
-            <div class="guia-apartado" id="guiaApartadoAcceso">
-                <span class="guia-apartado-numero">2</span>
+            <div class="guide-chapter" id="guiaApartadoAcceso">
+                <span class="guide-chapter-number">2</span>
                 <span>Acceso a paste</span>
             </div>
-            <div class="guia-apartado" id="guiaApartadoDashboard" hidden>
-                <span class="guia-apartado-numero">3</span>
+            <div class="guide-chapter" id="guiaApartadoDashboard" hidden>
+                <span class="guide-chapter-number">3</span>
                 <span>Dashboard</span>
             </div>
         </div>
-        <span class="guia-progreso" id="guiaProgreso"></span>
-        <button class="guia-cerrar" id="guiaCerrar" type="button" aria-label="Cerrar guía">×</button>
+        <span class="guide-progress" id="guiaProgreso"></span>
+        <button class="guide-close" id="guiaCerrar" type="button" aria-label="Cerrar guía">×</button>
         <h2 id="guiaTitulo"></h2>
         <p id="guiaTexto"></p>
         <div class="guia-acciones">
@@ -213,6 +238,7 @@
         </div>
     </aside>
 
+    <script src="js/common.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>

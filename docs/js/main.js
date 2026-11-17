@@ -14,6 +14,14 @@ const guideNext = document.getElementById("guiaSiguiente");
 const guideContinue = document.getElementById("guiaContinuar");
 const guideFinish = document.getElementById("guiaFinalizar");
 const guideClose = document.getElementById("guiaCerrar");
+const introduction = document.getElementById("pantallaIntroduccion");
+const introductionSeenKey = "sapaste-introduction-seen";
+const dashboardTutorialKey = "sapaste-demo-tutorial-dashboard";
+const pasteStorageKey = "sapaste-demo-paste";
+
+if (sessionStorage.getItem(introductionSeenKey) !== "true") {
+    introduction.hidden = false;
+}
 
 const guideSteps = [
     {
@@ -36,12 +44,12 @@ const guideSteps = [
     {
         target: "visibilidad",
         title: "Elige la visibilidad",
-        text: "Selecciona el tipo de paste. Para las opciones privadas, introduce una contraseña antes de guardar."
+        text: "Selecciona el tipo de paste. En las opciones privadas, introduce una contraseña antes de guardar."
     },
     {
         target: "url",
         title: "Creación del paste completada",
-        text: "Has terminado el apartado de creación. ¿Quieres continuar con la introducción para comprobar el acceso a tu paste?",
+        text: "Has creado tu primer paste. ¿Quieres continuar la simulacion y comprobar el acceso a tu paste?",
         chapterFinish: true
     },
     {
@@ -55,7 +63,7 @@ const guideSteps = [
     {
         target: "access-password",
         title: "Introduce la contraseña",
-        text: "Escribe la misma contraseña que elegiste al crear el paste privado.",
+        text: "Escribe la misma contraseña que instroduciste al crear el paste.",
         passwordStep: true,
         section: 2,
         sectionStep: 2
@@ -74,6 +82,7 @@ const guideSteps = [
 let guideStepIndex = 0;
 let guideActiveTarget = null;
 let currentPasteId = null;
+let currentPasteCreatedAt = null;
 let visibilityMode = "publico";
 let simulatedPassword = null;
 let guestReadOnly = false;
@@ -140,9 +149,9 @@ function showGuideStep(index) {
         : `Paso ${index + 1} de 5`;
     guideChapterCreation.hidden = isAccessSection;
     guideChapterDashboard.hidden = !isAccessSection;
-    guideChapterCreation.classList.toggle("activo", !isAccessSection);
-    guideChapterAccess.classList.toggle("activo", isAccessSection);
-    guideChapterDashboard.classList.remove("activo");
+    guideChapterCreation.classList.toggle("active", !isAccessSection);
+    guideChapterAccess.classList.toggle("active", isAccessSection);
+    guideChapterDashboard.classList.remove("active");
     guideChapterCreation.setAttribute("aria-current", isAccessSection ? "false" : "step");
     guideChapterAccess.setAttribute("aria-current", isAccessSection ? "step" : "false");
     guideChapterDashboard.setAttribute("aria-current", "false");
@@ -194,6 +203,15 @@ function closeGuide() {
     document.getElementById("access-password-input").value = "";
 }
 
+function closeIntroduction(startTutorial) {
+    introduction.hidden = true;
+    sessionStorage.setItem(introductionSeenKey, "true");
+    sessionStorage.removeItem(dashboardTutorialKey);
+    if (startTutorial) {
+        showGuideStep(0);
+    }
+}
+
 function generatePasteId() {
     if (window.crypto && window.crypto.getRandomValues) {
         const bytes = new Uint8Array(4);
@@ -214,22 +232,6 @@ function updateCharacterCount() {
     document.getElementById("contador").textContent = `Caracteres: ${editor.innerText.length}`;
 }
 
-function showToast(message, type = "verde") {
-    let container = document.getElementById("toast-container");
-
-    if (!container) {
-        container = document.createElement("div");
-        container.id = "toast-container";
-        document.body.appendChild(container);
-    }
-
-    const toast = document.createElement("div");
-    toast.className = `toast ${type}`;
-    toast.textContent = message;
-    container.appendChild(toast);
-    window.setTimeout(() => toast.remove(), 3000);
-}
-
 function guardarContenido() {
     if (!titleInput.value.trim()) {
         showToast("Escribe un título para continuar", "amarillo");
@@ -244,7 +246,9 @@ function guardarContenido() {
     }
 
     if (currentPasteId) {
-        savePaste();
+        if (savePaste() && guideStepIndex === 2 && !guidePopover.hidden) {
+            showGuideStep(4);
+        }
         return;
     }
 
@@ -287,14 +291,41 @@ function confirmarGuardado() {
     passwordInput.value = "";
     document.getElementById("vis-password-campo").style.display = "none";
     document.querySelector("input[name='visibilidad'][value='publico']").checked = true;
-    savePaste();
+    if (!savePaste()) {
+        return;
+    }
 }
 
 function savePaste() {
     if (!currentPasteId) {
         currentPasteId = generatePasteId();
+        currentPasteCreatedAt = new Date().toISOString();
     }
 
+    const paste = {
+        id: currentPasteId,
+        title: titleInput.value.trim(),
+        content: editor.innerText,
+        visibility: visibilityMode,
+        created: currentPasteCreatedAt
+    };
+
+    try {
+        sessionStorage.setItem(pasteStorageKey, JSON.stringify(paste));
+    } catch (error) {
+        showToast("No se pudo guardar el paste", "rojo");
+        return false;
+    }
+
+    updateSavedPasteUI();
+    showToast(`Paste guardado como ${visibilityLabels[visibilityMode]}`);
+    if (guideStepIndex === 3 && !guidePopover.hidden) {
+        showGuideStep(4);
+    }
+    return true;
+}
+
+function updateSavedPasteUI() {
     const url = `https://sapaste.duckdns.org/p/${currentPasteId}`;
     urlDisplay.textContent = `URL del simulador: ${url}`;
     document.getElementById("estadoBadge").className = "estado-badge guardado";
@@ -304,10 +335,35 @@ function savePaste() {
     document.getElementById("shareWhatsapp").href = `https://wa.me/?text=${encodeURIComponent(`Mira este clipboard: ${url}`)}`;
     document.getElementById("shareGmail").href = `https://mail.google.com/mail/?view=cm&body=${encodeURIComponent(`Mira este clipboard: ${url}`)}`;
     document.getElementById("shareTelegram").href = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=Mira este clipboard`;
-    showToast(`Paste guardado como ${visibilityLabels[visibilityMode]}`);
-    if (guideStepIndex === 3 && !guidePopover.hidden) {
-        showGuideStep(4);
+}
+
+function restoreSavedPaste() {
+    let paste;
+    try {
+        const storedPaste = sessionStorage.getItem(pasteStorageKey);
+        if (!storedPaste) {
+            return;
+        }
+        paste = JSON.parse(storedPaste);
+    } catch (error) {
+        showToast("No se pudo recuperar el paste guardado", "rojo");
+        return;
     }
+
+    if (!paste || typeof paste.id !== "string" || typeof paste.title !== "string" || typeof paste.content !== "string") {
+        showToast("El paste guardado no es válido", "rojo");
+        return;
+    }
+
+    currentPasteId = paste.id;
+    currentPasteCreatedAt = typeof paste.created === "string" ? paste.created : new Date().toISOString();
+    visibilityMode = Object.prototype.hasOwnProperty.call(visibilityLabels, paste.visibility)
+        ? paste.visibility
+        : "publico";
+    titleInput.value = paste.title;
+    editor.innerText = paste.content;
+    updateCharacterCount();
+    updateSavedPasteUI();
 }
 
 async function copiarUrl() {
@@ -423,19 +479,6 @@ function toggleDarkMode() {
         document.body.classList.contains("dark-mode") ? "Modo Claro" : "Modo Oscuro";
 }
 
-function startClock() {
-    function updateClock() {
-        const now = new Date();
-        const hours = String(now.getHours()).padStart(2, "0");
-        const minutes = String(now.getMinutes()).padStart(2, "0");
-        const seconds = String(now.getSeconds()).padStart(2, "0");
-        document.getElementById("reloj").textContent = `${hours}:${minutes}:${seconds}`;
-    }
-
-    updateClock();
-    window.setInterval(updateClock, 1000);
-}
-
 function applySystemTheme(isDark) {
     document.body.classList.toggle("dark-mode", isDark);
     document.getElementById("btnDarkMode").textContent = isDark ? "Modo Claro" : "Modo Oscuro";
@@ -453,6 +496,9 @@ document.querySelectorAll("input[name='visibilidad']").forEach(radio => {
 });
 
 document.getElementById("access-guest-button").addEventListener("click", entrarComoInvitado);
+document.getElementById("btnHacerSimulacion").addEventListener("click", () => showGuideStep(0));
+document.getElementById("btnEmpezarTutorial").addEventListener("click", () => closeIntroduction(true));
+document.getElementById("btnIrPorLibre").addEventListener("click", () => closeIntroduction(false));
 
 titleInput.addEventListener("input", () => {
     updateSaveStatus();
@@ -494,11 +540,12 @@ guideContinue.addEventListener("click", () => {
         title: titleInput.value.trim(),
         content: editor.innerText,
         visibility: visibilityMode,
-        created: new Date().toISOString()
+        created: currentPasteCreatedAt
     };
 
     try {
-        sessionStorage.setItem("sapaste-demo-paste", JSON.stringify(paste));
+        sessionStorage.setItem(pasteStorageKey, JSON.stringify(paste));
+        sessionStorage.setItem(dashboardTutorialKey, "true");
         window.location.href = "dashboard.html";
     } catch (error) {
         showToast("No se pudo preparar el paste para el dashboard", "rojo");
@@ -561,5 +608,5 @@ function updateHistoryTimes() {
     });
 }
 
-showGuideStep(0);
+restoreSavedPaste();
 startClock();

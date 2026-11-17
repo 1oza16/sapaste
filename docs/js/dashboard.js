@@ -1,8 +1,9 @@
 const STORAGE_KEY = "sapaste-demo-paste";
+const DASHBOARD_TUTORIAL_KEY = "sapaste-demo-tutorial-dashboard";
 const visibilityLabels = {
-    publico: "Público",
-    invitados: "Invitados",
-    estricto: "Estricto"
+    publico: "público",
+    invitados: "invitados",
+    estricto: "estricto"
 };
 const visibilityClasses = {
     publico: "badge-pub",
@@ -183,21 +184,6 @@ function formatLongDate(value) {
         });
 }
 
-function showToast(message, type = "verde") {
-    const container = document.getElementById("toast-container");
-    const toast = document.createElement("div");
-    toast.className = `toast ${type}`;
-
-    const icons = { verde: "✓", amarillo: "⚠", rojo: "✕" };
-    const icon = document.createElement("span");
-    icon.textContent = icons[type] || "•";
-    const text = document.createElement("span");
-    text.textContent = message;
-    toast.append(icon, text);
-    container.appendChild(toast);
-    window.setTimeout(() => toast.remove(), 3000);
-}
-
 function viewPaste(id) {
     selectedPaste = pastes.find(paste => paste.id === id);
     if (!selectedPaste) {
@@ -262,17 +248,6 @@ function applyTheme(isDark) {
     const slider = document.getElementById("theme-slider");
     slider.style.width = `${activeOption.offsetWidth}px`;
     slider.style.transform = `translateX(${isDark ? activeOption.offsetLeft - 3 : 0}px)`;
-}
-
-function startClock() {
-    const clock = document.getElementById("reloj");
-
-    function updateClock() {
-        clock.textContent = new Date().toLocaleTimeString("es-ES", { hour12: false });
-    }
-
-    updateClock();
-    window.setInterval(updateClock, 1000);
 }
 
 function showSection(name) {
@@ -367,7 +342,11 @@ window.addEventListener("scroll", positionGuide, true);
 initTheme();
 startClock();
 renderTable();
-guide.hidden = false;
-guideOverlay.classList.add("visible");
-guideOverlay.setAttribute("aria-hidden", "false");
-positionGuide();
+const shouldShowGuide = sessionStorage.getItem(DASHBOARD_TUTORIAL_KEY) === "true";
+sessionStorage.removeItem(DASHBOARD_TUTORIAL_KEY);
+if (shouldShowGuide) {
+    guide.hidden = false;
+    guideOverlay.classList.add("visible");
+    guideOverlay.setAttribute("aria-hidden", "false");
+    positionGuide();
+}

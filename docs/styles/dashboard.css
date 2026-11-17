@@ -57,22 +57,6 @@ body {
     margin: auto; 
 }
 
-.logo-oscuro {
-    display: none !important; 
-}
-
-.logo-claro {
-    display: block; 
-}
-
-body.dark-mode .logo-claro {
-    display: none !important; 
-}
-
-body.dark-mode .logo-oscuro {
-    display: block !important; 
-}
-
 /* Login */
 .login-overlay {
     position: fixed;
@@ -819,19 +803,6 @@ body.dark-mode .logo-oscuro {
     z-index: 9999;
 }
 
-.toast {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 11px 16px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 500;
-    border: 1px solid;
-    animation: slideIn 0.25s ease;
-    max-width: 300px;
-}
-
 .toast.verde   { background: var(--success-dim); color: var(--success); border-color: rgba(111,207,151,0.2); }
 .toast.rojo    { background: var(--danger-dim);  color: var(--danger);  border-color: rgba(255,107,107,0.2); }
 .toast.amarillo{ background: var(--warning-dim); color: var(--warning); border-color: rgba(255,209,102,0.2); }
@@ -845,11 +816,6 @@ body.dark-mode .logo-oscuro {
 @keyframes fadeIn {
     from { opacity: 0; }
     to   { opacity: 1; }
-}
-
-@keyframes slideIn {
-    from { opacity: 0; transform: translateX(20px); }
-    to   { opacity: 1; transform: translateX(0); }
 }
 
 /* Scrollbar */
@@ -920,26 +886,8 @@ body.dark-mode .logo-oscuro {
 
 /* Iconos */
 .iconos-pastes { width: 30px; margin: auto; }
-.icono-claro  { display: block; }
-.icono-oscuro { display: none;  }
-
-body.dark-mode .icono-claro  { display: none;  }
-body.dark-mode .icono-oscuro { display: block; }
 
 /* Introducción al dashboard */
-.dashboard-guide-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 9998;
-    background: rgba(18, 22, 28, 0.28);
-    backdrop-filter: blur(3px);
-}
-
-.dashboard-guide-overlay.visible {
-    display: block;
-}
-
 .modal-overlay {
     z-index: 10002;
 }
@@ -950,124 +898,7 @@ body.dark-mode .icono-oscuro { display: block; }
     box-shadow: 0 0 0 9999px rgba(18, 22, 28, 0.62);
 }
 
-.dashboard-guide {
-    position: fixed;
-    z-index: 10001;
-    width: min(320px, calc(100vw - 32px));
-    padding: 20px;
-    border: 1px solid #9aa9b8;
-    border-radius: 14px;
-    background: var(--surface);
-    color: var(--text);
-    font-family: var(--sans);
-    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
-}
-
-body.dark-mode .dashboard-guide {
-    border-color: #444;
-}
-
-.dashboard-guide[hidden] {
-    display: none;
-}
-
-.dashboard-guide-chapters {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px;
-    margin: 0 10px 14px 0;
-}
-
-.dashboard-guide-chapter {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    min-width: 0;
-    padding: 8px;
-    border: 1px solid #9aa9b8;
-    border-radius: 9px;
-    color: #777;
-    font-size: 11px;
-    font-weight: 600;
-    line-height: 1.25;
-}
-
-body.dark-mode .dashboard-guide-chapter {
-    border-color: #444;
-    color: #bbb;
-}
-
-.dashboard-guide-chapter > span:first-child {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex: 0 0 20px;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: #9aa9b8;
-    color: var(--surface);
-    font-size: 11px;
-    font-weight: 700;
-}
-
-body.dark-mode .dashboard-guide-chapter > span:first-child {
-    background: #444;
-    color: #2d2d2d;
-}
-
-.dashboard-guide-chapter.active {
-    border-color: var(--accent);
-    background: rgba(74, 144, 217, 0.1);
-    color: var(--text);
-}
-
-.dashboard-guide-chapter.active > span:first-child {
-    background: var(--accent);
-    color: #fff;
-}
-
-.dashboard-guide-progress {
-    display: block;
-    margin-bottom: 10px;
-    color: var(--accent);
-    font-family: var(--sans);
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-}
-
-.dashboard-guide h2 {
-    margin: 0 28px 8px 0;
-    font-size: 18px;
-}
-
-.dashboard-guide p {
-    margin: 0 0 16px;
-    color: #777;
-    font-size: 14px;
-    line-height: 1.5;
-}
-
-body.dark-mode .dashboard-guide p {
-    color: #bbb;
-}
-
-.dashboard-guide-close {
-    position: absolute;
-    top: 10px;
-    right: 12px;
-    padding: 0 4px;
-    border: 0;
-    background: transparent;
-    color: #888;
-    font-size: 23px;
-    line-height: 1;
-    cursor: pointer;
-}
-
-.dashboard-guide .btn-primary {
+#dashboard-guide .btn-primary {
     width: auto;
     padding: 8px 16px;
     border: 1px solid var(--accent);

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SApaste — Admin</title>
+    <link rel="stylesheet" href="styles/common.css">
     <link rel="stylesheet" href="styles/dashboard.css">
     <link rel="icon" href="img/sapaste-icon.png" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -58,7 +59,7 @@
                         <span class="reloj" id="reloj">00:00:00</span>
                     </div>
                     <div class="section-actions">
-                        <a class="btn-secondary" href="index.html">← Volver al editor</a>
+                        <a class="btn-secondary" href="index.html">Volver al editor</a>
                         <button class="btn-primary" onclick="recargarTabla()">↺ Recargar</button>
                     </div>
                 </div>
@@ -281,25 +282,26 @@
     <!-- Toast container -->
     <div id="toast-container"></div>
 
-    <div class="dashboard-guide-overlay" id="dashboard-guide-overlay" aria-hidden="true"></div>
-    <aside class="dashboard-guide" id="dashboard-guide" aria-labelledby="dashboard-guide-title" aria-describedby="dashboard-guide-text" hidden>
-        <div class="dashboard-guide-chapters" aria-label="Apartados de la introducción">
-            <div class="dashboard-guide-chapter">
-                <span>2</span>
+    <div class="guide-overlay" id="dashboard-guide-overlay" aria-hidden="true"></div>
+    <aside class="guide-dialog" id="dashboard-guide" aria-labelledby="dashboard-guide-title" aria-describedby="dashboard-guide-text" hidden>
+        <div class="guide-chapters" aria-label="Apartados de la introducción">
+            <div class="guide-chapter">
+                <span class="guide-chapter-number">2</span>
                 <span>Acceso a paste</span>
             </div>
-            <div class="dashboard-guide-chapter active">
-                <span>3</span>
+            <div class="guide-chapter active">
+                <span class="guide-chapter-number">3</span>
                 <span>Dashboard</span>
             </div>
         </div>
-        <span class="dashboard-guide-progress">Comprobación del paste</span>
-        <button class="dashboard-guide-close" id="dashboard-guide-close" type="button" aria-label="Finalizar introducción">×</button>
+        <span class="guide-progress">Comprobación del paste</span>
+        <button class="guide-close" id="dashboard-guide-close" type="button" aria-label="Finalizar introducción">×</button>
         <h2 id="dashboard-guide-title">Tu paste en el dashboard</h2>
         <p id="dashboard-guide-text">Desde aquí puedes revisar el paste, consultar sus detalles o eliminarlo.</p>
         <button class="btn-primary" id="dashboard-guide-finish" type="button">Finalizar introducción</button>
     </aside>
 
+    <script src="js/common.js"></script>
     <script src="js/dashboard.js"></script>
 </body>
 </html>
