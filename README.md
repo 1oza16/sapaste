@@ -59,7 +59,7 @@ Debido al cierre del servidor donde se alojaban originalmente la API y la base d
 Representa la función principal de la aplicación: el editor de texto enriquecido donde escribir o pegar contenido, aplicar formato, guardar, compartir y probar el flujo del paste.
 
 <div align="center">
-  <img src="web/img/screenshots/client web.gif" alt="Demostración de la vista del paste en SApaste" width="700">
+  <img src="docs/img/screenshots/web/client%20web.gif" alt="Demostración de la vista del paste en SApaste" width="700">
   <br>
   <sub><em>Vista del paste: editor, formato de texto, guardado y opciones para compartir.</em></sub>
 </div>
@@ -69,7 +69,7 @@ Representa la función principal de la aplicación: el editor de texto enriqueci
 Espacio de gestión al que solo pueden acceder los usuarios permitidos, pensado para administrar y supervisar los pastes desde una vista de control.
 
 <div align="center">
-  <img src="web/img/screenshots/dashboard.gif" alt="Demostración de la vista del dashboard en SApaste" width="700">
+  <img src="docs/img/screenshots/web/dashboard.gif" alt="Demostración de la vista del dashboard en SApaste" width="700">
   <br>
   <sub><em>Vista del dashboard: acceso restringido a usuarios permitidos y control de pastes.</em></sub>
 </div>
